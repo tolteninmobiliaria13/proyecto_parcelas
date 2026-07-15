@@ -1,8 +1,8 @@
 import './App.css'
-import Login from './pages/login/Login'
+import AppRouter from './routes/AppRouter'
 function App() {
   return (
-    <Login />
+    <AppRouter />
   )
 }
 
