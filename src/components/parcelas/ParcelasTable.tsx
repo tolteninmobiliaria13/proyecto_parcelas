@@ -28,7 +28,7 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">ID Parcela</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Propietario</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Superficie (m²)</th>
-                            /*luego cambiar por el numero de escritura y otros datos(tener en cuenta cambiar el type de parcelas)  */
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Escritura</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Estado</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Acciones</th>
                         </tr>
@@ -41,7 +41,7 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={5} className="py-8 px-6 text-center text-on-surface-variant/70">
+                                <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant/70">
                                     No se encontraron parcelas que coincidan con la búsqueda.
                                 </td>
                             </tr>

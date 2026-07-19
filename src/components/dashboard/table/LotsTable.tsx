@@ -23,8 +23,8 @@ export default function LotsTable() {
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-surface-container-low font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">
                         <tr>
-                            <th className="py-sm px-lg font-semibold uppercase tracking-wider">ID Parcela</th>
-                            <th className="py-sm px-lg font-semibold uppercase tracking-wider">Propietario</th>
+                            <th className="py-sm px-lg font-semibold uppercase tracking-wider">Lote</th>
+                            <th className="py-sm px-lg font-semibold uppercase tracking-wider">Comprador</th>
                             <th className="py-sm px-lg font-semibold uppercase tracking-wider text-right">Monto Pagado Total</th>
                             <th className="py-sm px-lg font-semibold uppercase tracking-wider">Último Pago</th>
                             <th className="py-sm px-lg font-semibold uppercase tracking-wider">Método de Pago</th>

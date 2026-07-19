@@ -44,6 +44,9 @@ export default function ParcelaRow({ parcela }: ParcelaRowProps) {
             <td className="py-4 px-6 text-on-surface-variant">
                 {parcela.surface.toLocaleString("es-CL")}
             </td>
+            <td className="py-4 px-6 text-on-surface-variant">
+                {parcela.escritura}
+            </td>
             <td className="py-4 px-6">
                 <ParcelaStatus status={parcela.status} />
             </td>
