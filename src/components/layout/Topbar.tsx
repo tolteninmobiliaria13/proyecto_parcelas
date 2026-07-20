@@ -1,4 +1,4 @@
-import SearchBar from "../dashboard/search/SearchBar";
+
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -16,7 +16,7 @@ export default function Topbar() {
         <header className="fixed top-0 right-0 w-[calc(100%-260px)] h-16 bg-surface-container-lowest text-primary border-b border-outline-variant flex justify-between items-center px-lg z-10">
             <div className="flex items-center gap-xl">
                 <h2 className="font-headline-md text-headline-md font-semibold text-on-surface">Panel de Gestión de Parcelas</h2>
-                <SearchBar />
+
             </div>
 
             <div className="flex items-center gap-md">

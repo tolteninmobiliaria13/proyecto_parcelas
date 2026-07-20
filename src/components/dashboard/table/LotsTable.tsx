@@ -12,10 +12,6 @@ export default function LotsTable() {
                         Últimos movimientos registrados en el sistema.
                     </p>
                 </div>
-                <button className="bg-primary text-on-primary font-label-md text-label-md px-md py-sm rounded-lg hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-xs">
-                    <span className="material-symbols-outlined text-[18px]">add</span>
-                    Registrar Nuevo Pago
-                </button>
             </div>
 
             {/* Table Content */}

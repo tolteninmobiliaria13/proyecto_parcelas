@@ -3,9 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/login/Login";
 import DashboardPage from "../pages/dashboard/Dashboardpage";
 import ParcelasPage from "../pages/parcelas/ParcelasPage";
-import PagosPage from "../pages/pagos/PagosPage";
 import VencimientosPage from "../pages/vencimientos/VencimientosPage";
-import ConfiguracionPage from "../pages/configuracion/ConfiguracionPage";
+
 
 export default function AppRouter() {
     return (
@@ -28,18 +27,8 @@ export default function AppRouter() {
                 />
 
                 <Route
-                    path="/pagos"
-                    element={<PagosPage />}
-                />
-
-                <Route
                     path="/vencimientos"
                     element={<VencimientosPage />}
-                />
-
-                <Route
-                    path="/configuracion"
-                    element={<ConfiguracionPage />}
                 />
 
             </Routes>

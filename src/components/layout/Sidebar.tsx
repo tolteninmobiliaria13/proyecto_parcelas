@@ -14,8 +14,7 @@ export default function Sidebar() {
         <nav className="fixed left-0 top-0 h-full w-[260px] bg-primary text-on-primary border-r border-outline-variant shadow-sm flex flex-col p-lg gap-xl z-20">
             <div className="flex items-center gap-sm">
                 <div>
-                    <h1 className="font-headline-md text-headline-md font-bold text-on-primary truncate">Gestión Inmobiliaria</h1>
-                    <p className="font-label-md text-label-md text-primary-fixed-dim">Admin v1.0</p>
+                    <h1 className="font-headline-md text-headline-md font-bold text-on-primary truncate">Inmobiliaria Toltén</h1>
                 </div>
             </div>
 

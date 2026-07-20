@@ -1,0 +1,94 @@
+import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
+
+interface VencimientosRowProps {
+  row: LotPaymentMatrix;
+  onCellClick?: (lot: LotPaymentMatrix, payment: MonthlyPayment) => void;
+}
+
+export const VencimientosRow = ({ row, onCellClick }: VencimientosRowProps) => {
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const progressPercent = Math.round((row.paidMonths / row.totalMonths) * 100);
+
+  return (
+    <tr className="hover:bg-surface-container/60 transition-colors group cursor-pointer">
+      {/* Sticky Lot / Client Column */}
+      <td className="p-md sticky left-0 z-10 bg-surface-container-lowest group-hover:bg-surface-container/60 border-r border-outline-variant shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-primary text-[14px]">{row.lotNumber}</span>
+          {row.project && (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium">
+              {row.project}
+            </span>
+          )}
+        </div>
+        <div className="text-[11px] text-on-surface-variant truncate max-w-[180px] mt-0.5">
+          {row.clientName}
+        </div>
+      </td>
+
+      {/* Summary / Progress Column */}
+      <td className="p-md text-center border-r border-outline-variant bg-surface-container-lowest/50">
+        <div className="flex flex-col items-center gap-1">
+          <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold">
+            {row.paidMonths} / {row.totalMonths}
+          </span>
+          <div className="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+            <div
+              className="bg-primary h-full rounded-full transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      </td>
+
+      {/* Monthly Payment Cells */}
+      {row.payments.map((payment, index) => {
+        const isPaid = payment.status === 'paid';
+        const isOverdue = payment.status === 'overdue';
+
+        return (
+          <td
+            key={index}
+            onClick={() => onCellClick && onCellClick(row, payment)}
+            className="p-xs border-r border-outline-variant text-center transition-all hover:bg-surface-container"
+          >
+            <div className="flex flex-col items-center justify-center p-1 min-h-[46px]">
+              {payment.dueDate && (
+                <span className="text-[9px] text-outline block mb-0.5 opacity-80">
+                  {payment.dueDate}
+                </span>
+              )}
+
+              {isPaid && (
+                <div className="w-full py-1 px-1 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md flex items-center justify-center gap-1">
+                  <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                  <span className="font-bold text-[10px]">{formatAmount(payment.amount)}</span>
+                </div>
+              )}
+
+              {isOverdue && (
+                <div className="w-full py-1 px-1 bg-rose-50 border border-rose-200 text-rose-700 rounded-md flex items-center justify-center gap-1 animate-pulse">
+                  <span className="material-symbols-outlined text-[14px]">warning</span>
+                  <span className="font-bold text-[10px]">{formatAmount(payment.amount)}</span>
+                </div>
+              )}
+
+              {!isPaid && !isOverdue && (
+                <div className="w-full py-1 px-1 bg-slate-50 border border-slate-200 text-slate-500 rounded-md flex items-center justify-center">
+                  <span className="font-medium text-[10px]">{formatAmount(payment.amount)}</span>
+                </div>
+              )}
+            </div>
+          </td>
+        );
+      })}
+    </tr>
+  );
+};
