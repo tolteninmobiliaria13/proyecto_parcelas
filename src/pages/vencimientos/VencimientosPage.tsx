@@ -32,39 +32,7 @@ export const VencimientosPage = () => {
         });
     }, [searchTerm, selectedStatus]);
 
-    // Overall Statistics
-    const stats = useMemo(() => {
-        let totalCollected = 0;
-        let overdueCount = 0;
-        let overdueAmount = 0;
-        let totalPayments = 0;
-        let paidPayments = 0;
 
-        matrixData.forEach((row) => {
-            row.payments.forEach((p) => {
-                totalPayments++;
-                if (p.status === 'paid') {
-                    totalCollected += p.amount;
-                    paidPayments++;
-                } else if (p.status === 'overdue') {
-                    overdueCount++;
-                    overdueAmount += p.amount;
-                }
-            });
-        });
-
-        const complianceRate =
-            totalPayments > 0
-                ? Math.round((paidPayments / (paidPayments + overdueCount)) * 100)
-                : 100;
-
-        return {
-            totalCollected,
-            overdueCount,
-            overdueAmount,
-            complianceRate,
-        };
-    }, []);
 
     const formatCurrency = (val: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -99,14 +67,20 @@ export const VencimientosPage = () => {
 
             {/* Payment Detail Modal */}
             {selectedCell && (
-                <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-md animate-fade-in">
-                    <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl max-w-md w-full p-lg flex flex-col gap-md">
-                        <div className="flex items-start justify-between border-b border-outline-variant pb-md">
+                <div 
+                    onClick={() => setSelectedCell(null)}
+                    className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 sm:p-md animate-fade-in"
+                >
+                    <div 
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto p-4 sm:p-lg flex flex-col gap-md"
+                    >
+                        <div className="flex items-start justify-between border-b border-outline-variant pb-3">
                             <div>
                                 <span className="text-[11px] font-bold uppercase text-primary">
                                     {selectedCell.lot.project}
                                 </span>
-                                <h3 className="font-headline-md text-headline-md text-on-surface">
+                                <h3 className="font-headline-md text-base sm:text-headline-md text-on-surface">
                                     {selectedCell.lot.lotNumber} - {selectedCell.payment.month} {selectedCell.payment.year}
                                 </h3>
                                 <p className="text-[12px] text-on-surface-variant">
@@ -115,7 +89,7 @@ export const VencimientosPage = () => {
                             </div>
                             <button
                                 onClick={() => setSelectedCell(null)}
-                                className="text-outline hover:text-on-surface p-1"
+                                className="text-outline hover:text-on-surface p-1 rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
                             >
                                 <span className="material-symbols-outlined text-[20px]">close</span>
                             </button>
@@ -176,10 +150,10 @@ export const VencimientosPage = () => {
                             )}
                         </div>
 
-                        <div className="flex justify-end gap-sm pt-sm border-t border-outline-variant">
+                        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-sm border-t border-outline-variant">
                             <button
                                 onClick={() => setSelectedCell(null)}
-                                className="px-md py-sm border border-outline-variant rounded-lg text-label-md hover:bg-surface-container"
+                                className="w-full sm:w-auto px-md py-2 border border-outline-variant rounded-lg text-xs sm:text-label-md hover:bg-surface-container transition-colors cursor-pointer text-center"
                             >
                                 Cerrar
                             </button>
@@ -189,7 +163,7 @@ export const VencimientosPage = () => {
                                         alert(`Registrando pago para ${selectedCell.lot.lotNumber}...`);
                                         setSelectedCell(null);
                                     }}
-                                    className="px-md py-sm bg-primary text-on-primary rounded-lg text-label-md hover:bg-primary/90 flex items-center gap-xs"
+                                    className="w-full sm:w-auto px-md py-2 bg-primary text-on-primary rounded-lg text-xs sm:text-label-md hover:bg-primary/90 flex items-center justify-center gap-xs cursor-pointer"
                                 >
                                     <span className="material-symbols-outlined text-[18px]">payments</span>
                                     Registrar Pago
@@ -199,7 +173,7 @@ export const VencimientosPage = () => {
                                     onClick={() => {
                                         alert(`Generando comprobante ${selectedCell.payment.receiptNumber}...`);
                                     }}
-                                    className="px-md py-sm bg-emerald-600 text-white rounded-lg text-label-md hover:bg-emerald-700 flex items-center gap-xs"
+                                    className="w-full sm:w-auto px-md py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-label-md hover:bg-emerald-700 flex items-center justify-center gap-xs cursor-pointer"
                                 >
                                     <span className="material-symbols-outlined text-[18px]">receipt</span>
                                     Ver Comprobante

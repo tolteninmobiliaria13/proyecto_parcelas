@@ -18,20 +18,20 @@ export const VencimientosHeader = ({
   onExport,
 }: VencimientosHeaderProps) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-end justify-between mb-lg gap-lg">
+    <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-4 sm:mb-lg gap-4 sm:gap-lg">
       <div>
-        <h2 className="font-display text-display text-primary mb-sm">
+        <h2 className="font-display text-2xl sm:text-display text-primary mb-1">
           Control de Cuotas y Vencimientos
         </h2>
-        <p className="font-body-lg text-body-lg text-secondary">
+        <p className="font-body-lg text-xs sm:text-body-lg text-secondary">
           Matriz de seguimiento de pagos por lote y período fiscal.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-md">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-end gap-3 sm:gap-md">
         {/* Search Input */}
         {onSearchChange && (
-          <div className="relative min-w-[200px]">
+          <div className="relative w-full sm:w-[220px]">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">
               search
             </span>
@@ -40,43 +40,45 @@ export const VencimientosHeader = ({
               placeholder="Buscar lote o cliente..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-9 pr-md py-sm bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full pl-9 pr-md py-sm bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
         )}
 
-        {/* Year Filter */}
-        <div className="flex flex-col gap-xs">
-          <label className="font-label-md text-label-md text-outline">Año Fiscal</label>
-          <select
-            value={selectedYear}
-            onChange={(e) => onYearChange && onYearChange(e.target.value)}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md focus:ring-primary focus:outline-none cursor-pointer"
-          >
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-          </select>
-        </div>
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-3">
+          {/* Year Filter */}
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-xs text-outline">Año Fiscal</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => onYearChange && onYearChange(e.target.value)}
+              className="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-sm focus:ring-primary focus:outline-none cursor-pointer"
+            >
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+            </select>
+          </div>
 
-        {/* Status Filter */}
-        <div className="flex flex-col gap-xs">
-          <label className="font-label-md text-label-md text-outline">Estado</label>
-          <select
-            value={selectedStatus}
-            onChange={(e) => onStatusChange && onStatusChange(e.target.value)}
-            className="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md focus:ring-primary focus:outline-none cursor-pointer"
-          >
-            <option value="Todos">Todos</option>
-            <option value="Solo Vencidos">Solo Vencidos</option>
-            <option value="Al Día">Al Día</option>
-          </select>
+          {/* Status Filter */}
+          <div className="flex flex-col gap-xs">
+            <label className="font-label-md text-xs text-outline">Estado</label>
+            <select
+              value={selectedStatus}
+              onChange={(e) => onStatusChange && onStatusChange(e.target.value)}
+              className="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-sm focus:ring-primary focus:outline-none cursor-pointer"
+            >
+              <option value="Todos">Todos</option>
+              <option value="Solo Vencidos">Solo Vencidos</option>
+              <option value="Al Día">Al Día</option>
+            </select>
+          </div>
         </div>
 
         {/* Export CTA */}
         <button
           onClick={onExport || (() => alert('Exportando reporte de vencimientos...'))}
-          className="h-[42px] mt-auto px-lg bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:brightness-110 transition-all flex items-center gap-sm cursor-pointer shadow-sm"
+          className="h-[40px] mt-auto px-lg bg-primary text-on-primary rounded-lg font-label-md text-sm hover:brightness-110 transition-all flex items-center justify-center gap-sm cursor-pointer shadow-sm whitespace-nowrap"
         >
           <span className="material-symbols-outlined text-[18px]">download</span> Exportar Reporte
         </button>

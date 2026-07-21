@@ -4,16 +4,19 @@ type NavItemProps = {
     title: string;
     path: string;
     icon: string;
+    onClick?: () => void;
 };
 
 export default function NavItem({
     title,
     path,
     icon,
+    onClick,
 }: NavItemProps) {
     return (
         <NavLink
             to={path}
+            onClick={onClick}
             className={({ isActive }) =>
                 `flex items-center gap-md px-md py-sm rounded-lg transition-all duration-200 ${
                     isActive

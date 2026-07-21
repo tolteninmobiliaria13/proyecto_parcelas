@@ -9,34 +9,34 @@ export default function Login() {
     };
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-surface-bright text-on-surface antialiased p-md">
+        <main className="min-h-screen flex items-center justify-center bg-surface-bright text-on-surface antialiased p-4 sm:p-md overflow-hidden">
             {/* Contenedor principal con fondo decorativo de resplandor */}
             <div className="relative w-full max-w-md">
                 {/* Glow decorativo de fondo */}
-                <div className="absolute -left-16 -top-16 w-48 h-48 bg-primary-fixed/30 rounded-full blur-2xl"></div>
-                <div className="absolute -right-16 -bottom-16 w-48 h-48 bg-secondary-fixed/30 rounded-full blur-2xl"></div>
+                <div className="absolute -left-12 -top-12 sm:-left-16 sm:-top-16 w-36 sm:w-48 h-36 sm:h-48 bg-primary-fixed/30 rounded-full blur-2xl pointer-events-none"></div>
+                <div className="absolute -right-12 -bottom-12 sm:-right-16 sm:-bottom-16 w-36 sm:w-48 h-36 sm:h-48 bg-secondary-fixed/30 rounded-full blur-2xl pointer-events-none"></div>
 
                 {/* Tarjeta de Login */}
-                <section className="relative bg-surface-container-lowest border border-outline-variant rounded-xl p-xl shadow-lg flex flex-col items-center z-10">
+                <section className="relative bg-surface-container-lowest border border-outline-variant rounded-xl p-6 sm:p-xl shadow-lg flex flex-col items-center z-10">
                     {/* Icono de la marca */}
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-lg shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-6 sm:mb-lg shrink-0">
                         <span className="material-symbols-outlined text-primary text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                             real_estate_agent
                         </span>
                     </div>
 
-                    <h1 className="font-headline-lg text-headline-lg font-bold text-center text-on-surface mb-xs">
+                    <h1 className="font-headline-lg text-xl sm:text-headline-lg font-bold text-center text-on-surface mb-xs">
                         Inmobiliaria Toltén
                     </h1>
 
-                    <p className="font-body-md text-body-md text-on-surface-variant/80 text-center mb-xl">
+                    <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant/80 text-center mb-6 sm:mb-xl">
                         Inicia sesión para acceder al panel de parcelas.
                     </p>
 
                     {/* Botón de Google */}
                     <button
                         onClick={handleLogin}
-                        className="w-full flex items-center justify-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest px-md py-sm font-label-md text-body-md text-on-surface shadow-sm transition-all duration-200 hover:bg-surface-container-low hover:border-outline cursor-pointer"
+                        className="w-full flex items-center justify-center rounded-lg border border-outline-variant/60 bg-surface-container-lowest px-4 py-3 sm:py-sm font-label-md text-sm text-on-surface shadow-sm transition-all duration-200 hover:bg-surface-container-low hover:border-outline cursor-pointer"
                     >
                         {/* Icono oficial de Google */}
                         <svg className="w-5 h-5 mr-3 shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
