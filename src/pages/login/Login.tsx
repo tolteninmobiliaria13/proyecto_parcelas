@@ -1,12 +1,40 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
+    const { user, loading, signInWithGoogle } = useAuth();
     const navigate = useNavigate();
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-    /* al conectar supabase reemplazar por el login de google */
-    const handleLogin = () => {
-        navigate("/dashboard");
+    useEffect(() => {
+        if (!loading && user) {
+            navigate("/dashboard", { replace: true });
+        }
+    }, [user, loading, navigate]);
+
+    const handleLogin = async () => {
+        try {
+            setErrorMsg(null);
+            await signInWithGoogle();
+        } catch (error) {
+            console.error("Error al iniciar sesión con Google:", error);
+            setErrorMsg("No se pudo iniciar sesión con Google. Por favor, intenta de nuevo.");
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-surface-bright text-on-surface antialiased">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
+                    <p className="font-label-md text-on-surface-variant/80 animate-pulse text-sm">
+                        Verificando sesión...
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-surface-bright text-on-surface antialiased p-4 sm:p-md overflow-hidden">
@@ -32,6 +60,14 @@ export default function Login() {
                     <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant/80 text-center mb-6 sm:mb-xl">
                         Inicia sesión para acceder al panel de parcelas.
                     </p>
+
+                    {/* Mensaje de Error */}
+                    {errorMsg && (
+                        <div className="w-full mb-4 p-3 rounded-lg bg-error/10 border border-error/20 text-error text-xs font-medium flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[18px]">error</span>
+                            <span>{errorMsg}</span>
+                        </div>
+                    )}
 
                     {/* Botón de Google */}
                     <button

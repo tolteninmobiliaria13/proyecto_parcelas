@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { menuItems } from "../../data/menu";
 import NavItem from "../ui/NavItem";
+import { useAuth } from "../../context/AuthContext";
 
 type SidebarProps = {
     isOpen?: boolean;
@@ -9,10 +10,16 @@ type SidebarProps = {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const navigate = useNavigate();
+    const { signOut } = useAuth();
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         if (onClose) onClose();
-        navigate("/");
+        try {
+            await signOut();
+            navigate("/");
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+        }
     };
 
     return (
