@@ -18,12 +18,12 @@ export const VencimientosTable = ({
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xs overflow-hidden flex flex-col">
       {/* Table Subheader & Legend */}
-      <div className="p-4 sm:p-md bg-surface-container flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-outline-variant gap-3">
+      <div className="p-4 sm:p-lg bg-surface-container-low flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-outline-variant gap-3">
         <div>
-          <h3 className="font-headline-md text-base sm:text-headline-md text-on-surface">
+          <h3 className="font-headline-md text-base sm:text-headline-md text-on-surface font-semibold">
             Detalle de Pagos por Lote ({selectedYear})
           </h3>
-          <p className="text-[11px] sm:text-[12px] text-on-surface-variant">
+          <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
             Haz clic en una celda para ver el detalle de la cuota o registrar pago.
           </p>
         </div>

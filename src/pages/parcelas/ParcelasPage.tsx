@@ -7,11 +7,11 @@ export default function ParcelasPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-7xl mx-auto">
+            <div className="max-w-[1400px] mx-auto w-full flex flex-col gap-6 sm:gap-lg">
                 {/* Page Header & Actions */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6 sm:mb-xl gap-4">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div>
-                        <h2 className="font-display text-2xl sm:text-display text-on-background">Listado de Parcelas</h2>
+                        <h2 className="font-display text-2xl sm:text-display text-on-background font-bold">Listado de Parcelas</h2>
                         <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
                             Administración y registro general de loteos.
                         </p>

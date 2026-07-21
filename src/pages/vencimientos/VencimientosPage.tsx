@@ -44,7 +44,7 @@ export const VencimientosPage = () => {
 
     return (
         <DashboardLayout>
-            <div className="flex flex-col gap-lg">
+            <div className="max-w-[1400px] mx-auto w-full flex flex-col gap-6 sm:gap-lg">
                 {/* Header Component */}
                 <VencimientosHeader
                     searchTerm={searchTerm}
@@ -54,8 +54,6 @@ export const VencimientosPage = () => {
                     selectedStatus={selectedStatus}
                     onStatusChange={setSelectedStatus}
                 />
-
-
 
                 {/* Table Component */}
                 <VencimientosTable

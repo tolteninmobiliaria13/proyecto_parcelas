@@ -6,6 +6,9 @@ export const parcelas: Parcela[] = [
         owner: "Carlos Mendoza",
         surface: 1250,
         escritura: "123456789",
+        precioVenta: 10000000,
+        abono: 2000000,
+        saldo: 8000000,
         status: "current",
     },
     {
@@ -13,6 +16,9 @@ export const parcelas: Parcela[] = [
         owner: "Laura Rodríguez",
         surface: 850,
         escritura: "123456789",
+        precioVenta: 10000000,
+        abono: 2000000,
+        saldo: 8000000,
         status: "overdue",
     },
     {
@@ -20,6 +26,9 @@ export const parcelas: Parcela[] = [
         owner: "Javier Gómez",
         surface: 2100,
         escritura: "123456789",
+        precioVenta: 10000000,
+        abono: 2000000,
+        saldo: 8000000,
         status: "current",
     },
     {
@@ -27,6 +36,9 @@ export const parcelas: Parcela[] = [
         owner: "Ana Fernández",
         surface: 500,
         escritura: "123456789",
+        precioVenta: 10000000,
+        abono: 2000000,
+        saldo: 8000000,
         status: "current",
     },
     {
@@ -34,6 +46,9 @@ export const parcelas: Parcela[] = [
         owner: "Sin Asignar",
         surface: 1800,
         escritura: "123456789",
+        precioVenta: 10000000,
+        abono: 2000000,
+        saldo: 8000000,
         status: "inactive",
     },
 ];

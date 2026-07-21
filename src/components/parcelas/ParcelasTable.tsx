@@ -20,18 +20,31 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
 
     return (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col">
+            {/* Table Subheader */}
+            <div className="flex justify-between items-center p-4 sm:p-lg border-b border-outline-variant bg-surface-container-low">
+                <div>
+                    <h3 className="font-headline-md text-base sm:text-headline-md text-on-surface font-semibold">Registro de Parcelas</h3>
+                    <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
+                        Listado actualizado de roles, propietarios, montos y estado de escritura.
+                    </p>
+                </div>
+            </div>
+
             {/* Desktop Table View */}
             <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
+                <table className="w-full text-left border-collapse min-w-[950px]">
                     {/* Table Header */}
                     <thead className="bg-surface-container-low border-b border-outline-variant">
-                        <tr>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">ID Parcela</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Propietario</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Superficie (m²)</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Escritura</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Estado</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Acciones</th>
+                        <tr className="text-center">
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Lote</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Propietario</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Superficie (m²)</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Escritura</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Precio Venta</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Abono</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Saldo</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Estado</th>
+                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center">Acciones</th>
                         </tr>
                     </thead>
                     {/* Table Body */}
@@ -42,7 +55,7 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant/70">
+                                <td colSpan={9} className="py-8 px-6 text-center text-on-surface-variant/70">
                                     No se encontraron parcelas que coincidan con la búsqueda.
                                 </td>
                             </tr>
@@ -65,7 +78,7 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
             </div>
 
             {/* Pagination Footer */}
-            <div className="bg-surface-container-lowest border-t border-outline-variant p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="bg-surface-container-low border-t border-outline-variant p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="font-body-md text-on-surface-variant text-xs sm:text-sm text-center sm:text-left">
                     Mostrando <span className="font-medium text-on-surface">1</span> a <span className="font-medium text-on-surface">{Math.min(filteredParcelas.length, 5)}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
                 </span>

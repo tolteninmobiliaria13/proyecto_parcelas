@@ -1,3 +1,5 @@
+import ExportButton from '../ui/ExportButton';
+
 interface VencimientosHeaderProps {
   searchTerm?: string;
   onSearchChange?: (val: string) => void;
@@ -18,12 +20,12 @@ export const VencimientosHeader = ({
   onExport,
 }: VencimientosHeaderProps) => {
   return (
-    <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-4 sm:mb-lg gap-4 sm:gap-lg">
+    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
-        <h2 className="font-display text-2xl sm:text-display text-primary mb-1">
+        <h2 className="font-display text-2xl sm:text-display text-on-background font-bold">
           Control de Cuotas y Vencimientos
         </h2>
-        <p className="font-body-lg text-xs sm:text-body-lg text-secondary">
+        <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
           Matriz de seguimiento de pagos por lote y período fiscal.
         </p>
       </div>
@@ -75,13 +77,8 @@ export const VencimientosHeader = ({
           </div>
         </div>
 
-        {/* Export CTA */}
-        <button
-          onClick={onExport || (() => alert('Exportando reporte de vencimientos...'))}
-          className="h-[40px] mt-auto px-lg bg-primary text-on-primary rounded-lg font-label-md text-sm hover:brightness-110 transition-all flex items-center justify-center gap-sm cursor-pointer shadow-sm whitespace-nowrap"
-        >
-          <span className="material-symbols-outlined text-[18px]">download</span> Exportar Reporte
-        </button>
+        {/* Botón reutilizable de exportación */}
+        <ExportButton onClick={onExport} className="mt-auto" />
       </div>
     </div>
   );

@@ -9,47 +9,41 @@ export interface DashboardStat {
     };
     borderColor?: string;
     iconColorClass?: string;
-    blurBgClass?: string;
     descClass?: string;
 }
 
 export const dashboardStats: DashboardStat[] = [
     {
-        title: "Total Parcelas",
-        value: "150",
-        description: "Gestión activa",
-        icon: "landscape",
-        iconColorClass: "text-primary",
-        blurBgClass: "bg-primary-fixed/30 group-hover:bg-primary-fixed/50",
-    },
-    {
-        title: "Pagos Recaudados Mes",
+        title: "Total por pagar",
         value: "$2.500.000",
-        description: "",
-        icon: "account_balance_wallet",
-        trend: {
-            value: "+12% vs mes anterior",
-            isPositive: true,
-        },
-        iconColorClass: "text-primary",
-        blurBgClass: "bg-secondary-fixed/30 group-hover:bg-secondary-fixed/50",
-    },
-    {
-        title: "Cuotas Vencidas Hoy",
-        value: "12",
-        description: "Requiere acción inmediata",
-        icon: "warning",
-        borderColor: "border-error-container",
-        iconColorClass: "text-error",
-        blurBgClass: "bg-error-container/40 group-hover:bg-error-container/60",
+        description: "Suma total de los pagos pendientes de cobro.",
+        icon: "account_balance",
+        iconColorClass: "text-secondary",
         descClass: "text-error font-medium",
     },
     {
-        title: "Próximos Venc. (30 días)",
+        title: "Total Pagado mes",
+        value: "$12.500.000",
+        description: "Suma total de los pagos realizados este mes.",
+        icon: "account_balance_wallet",
+        iconColorClass: "text-secondary",
+        descClass: "text-primary font-medium",
+    },
+    {
+        title: "Lotes con Deuda",
+        value: "12",
+        description: "Deuda de uno o más meses",
+        icon: "warning",
+        borderColor: "border-error-container",
+        iconColorClass: "text-error",
+        descClass: "text-error font-medium",
+    },
+    {
+        title: "Proximos Vencimientos",
         value: "25",
-        description: "Revisar programación",
+        description: "Vencen dentro del mes",
         icon: "event",
         iconColorClass: "text-secondary",
-        blurBgClass: "bg-surface-variant/50 group-hover:bg-surface-variant/80",
+        descClass: "text-error font-medium",
     },
 ];
