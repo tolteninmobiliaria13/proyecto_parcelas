@@ -67,11 +67,19 @@ export const VencimientosPage = () => {
         if (!selectedCell) return;
         setLoadingSavePayment(true);
         try {
+            const STATUS_MAP: Record<string, string> = {
+                paid: 'pagado',
+                overdue: 'vencido',
+                pending: 'pendiente',
+                pagado: 'pagado',
+                vencido: 'vencido',
+                pendiente: 'pendiente',
+            };
             await actualizarPago(selectedCell.payment.id || '', {
                 monto_cobrar: editAmount,
                 fecha_vencimiento: editDueDate || undefined,
-                fecha_pago_real: editStatus === "paid" ? (editPaidDate || new Date().toISOString().substring(0, 10)) : null,
-                estado: editStatus,
+                fecha_pago_real: editStatus === "paid" || editStatus === "pagado" ? (editPaidDate || new Date().toISOString().substring(0, 10)) : null,
+                estado: STATUS_MAP[editStatus] || editStatus,
             });
             const data = await getVencimientos(Number(selectedYear));
             setMatrixData(data);
@@ -120,6 +128,7 @@ export const VencimientosPage = () => {
                 <VencimientosTable
                     data={filteredData}
                     selectedYear={selectedYear}
+                    onYearChange={setSelectedYear}
                     onCellClick={(lot, payment) => setSelectedCell({ lot, payment })}
                     loading={loading}
                     error={error}

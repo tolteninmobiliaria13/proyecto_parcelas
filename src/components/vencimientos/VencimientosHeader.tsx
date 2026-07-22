@@ -1,4 +1,4 @@
-import ExportButton from '../ui/ExportButton';
+const YEARS = ['2024', '2025', '2026'];
 
 interface VencimientosHeaderProps {
   searchTerm?: string;
@@ -7,17 +7,15 @@ interface VencimientosHeaderProps {
   onYearChange?: (year: string) => void;
   selectedStatus?: string;
   onStatusChange?: (status: string) => void;
-  onExport?: () => void;
 }
 
 export const VencimientosHeader = ({
   searchTerm = '',
   onSearchChange,
-  selectedYear = '2025',
+  selectedYear = '',
   onYearChange,
   selectedStatus = 'Todos',
   onStatusChange,
-  onExport,
 }: VencimientosHeaderProps) => {
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -53,12 +51,13 @@ export const VencimientosHeader = ({
             <label className="font-label-md text-xs text-outline">Año Fiscal</label>
             <select
               value={selectedYear}
-              onChange={(e) => onYearChange && onYearChange(e.target.value)}
+              onChange={(e) => onYearChange?.(e.target.value)}
               className="bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-sm focus:ring-primary focus:outline-none cursor-pointer"
             >
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
+              <option value="">Todos los años</option>
+              {YEARS.map((y) => (
+                <option key={y} value={y}>{y}</option>
+              ))}
             </select>
           </div>
 
@@ -76,9 +75,6 @@ export const VencimientosHeader = ({
             </select>
           </div>
         </div>
-
-        {/* Botón reutilizable de exportación */}
-        <ExportButton onClick={onExport} className="mt-auto" />
       </div>
     </div>
   );
