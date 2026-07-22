@@ -7,4 +7,6 @@ export interface Parcela {
     abono: number;
     saldo: number;
     status: "current" | "overdue" | "inactive";
+    subdivision?: string;
+    estado?: string;
 }

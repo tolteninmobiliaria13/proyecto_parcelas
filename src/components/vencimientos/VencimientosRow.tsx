@@ -52,6 +52,20 @@ export const VencimientosRow = ({ row, onCellClick }: VencimientosRowProps) => {
       {row.payments.map((payment, index) => {
         const isPaid = payment.status === 'paid';
         const isOverdue = payment.status === 'overdue';
+        const isNone = payment.status === 'none';
+
+        if (isNone) {
+          return (
+            <td
+              key={index}
+              className="p-xs border-r border-outline-variant text-center bg-surface-container-low/20 cursor-default"
+            >
+              <div className="flex flex-col items-center justify-center p-1 min-h-[46px]">
+                <span className="text-outline/40 text-[12px] font-medium">-</span>
+              </div>
+            </td>
+          );
+        }
 
         return (
           <td

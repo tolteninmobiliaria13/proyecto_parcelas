@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/login/Login";
 import DashboardPage from "../pages/dashboard/Dashboardpage";
 import ParcelasPage from "../pages/parcelas/ParcelasPage";
+import ClientesPage from "../pages/clientes/ClientesPage";
 import VencimientosPage from "../pages/vencimientos/VencimientosPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -29,10 +30,16 @@ export default function AppRouter() {
                     />
 
                     <Route
+                        path="/clientes"
+                        element={<ClientesPage />}
+                    />
+
+                    <Route
                         path="/vencimientos"
                         element={<VencimientosPage />}
                     />
                 </Route>
+
 
             </Routes>
         </BrowserRouter>

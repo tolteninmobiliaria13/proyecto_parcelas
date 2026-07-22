@@ -1,22 +1,111 @@
-import { parcelas } from "../../data/parcelas";
+import { useState, useEffect } from "react";
+import type { Parcela } from "../../types/parcela";
+import { getParcelas } from "../../services/api";
 import ParcelaRow, { ParcelaCard } from "./ParcelaRow";
 
 type ParcelasTableProps = {
     searchQuery: string;
+    refreshTrigger: number;
+    onAssignOwner: (parcela: Parcela) => void;
+    onEditParcela: (parcela: Parcela) => void;
+    onEditContrato: (parcela: Parcela) => void;
+    onDeleteParcela: (parcela: Parcela) => void;
 };
 
-export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
-    // Client-side filtering by id or owner
+function ParcelaRowSkeleton() {
+    return (
+        <tr className="animate-pulse text-center">
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-16 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="flex items-center justify-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-outline-variant/30 shrink-0"></div>
+                    <div className="h-5 bg-outline-variant/30 rounded w-28"></div>
+                </div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-16 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-20 mx-auto font-mono text-xs"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-20 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-20 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-5 bg-outline-variant/30 rounded w-20 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4 border-r border-outline-variant">
+                <div className="h-6 bg-outline-variant/30 rounded-full w-16 mx-auto"></div>
+            </td>
+            <td className="py-4 px-4">
+                <div className="h-5 bg-outline-variant/30 rounded w-6 mx-auto"></div>
+            </td>
+        </tr>
+    );
+}
+
+function ParcelaCardSkeleton() {
+    return (
+        <div className="p-4 bg-surface-container-lowest flex flex-col gap-3 animate-pulse">
+            <div className="flex items-center justify-between">
+                <div className="h-5 bg-outline-variant/30 rounded w-16"></div>
+                <div className="h-6 bg-outline-variant/30 rounded w-20"></div>
+            </div>
+            <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-outline-variant/30 shrink-0"></div>
+                <div className="h-5 bg-outline-variant/30 rounded w-28"></div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-2.5 rounded-lg border border-outline-variant/20 bg-surface-container-low/40">
+                <div className="h-8 bg-outline-variant/20 rounded"></div>
+                <div className="h-8 bg-outline-variant/20 rounded"></div>
+                <div className="h-8 bg-outline-variant/20 rounded"></div>
+            </div>
+        </div>
+    );
+}
+
+export default function ParcelasTable({
+    searchQuery,
+    refreshTrigger,
+    onAssignOwner,
+    onEditParcela,
+    onEditContrato,
+    onDeleteParcela,
+}: ParcelasTableProps) {
+    const [parcelas, setParcelas] = useState<Parcela[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        getParcelas()
+            .then((data) => {
+                setParcelas(data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Error al obtener listado de parcelas:", err);
+                setError("No se pudieron cargar las parcelas.");
+                setLoading(false);
+            });
+    }, [refreshTrigger]);
+
+    // Client-side filtering by id (lote) or owner (propietario)
     const filteredParcelas = parcelas.filter((parcela) => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
         return (
-            parcela.id.toLowerCase().includes(query) ||
-            parcela.owner.toLowerCase().includes(query)
+            (parcela.id && parcela.id.toLowerCase().includes(query)) ||
+            (parcela.owner && parcela.owner.toLowerCase().includes(query))
         );
     });
 
-    const totalCount = searchQuery ? filteredParcelas.length : 150;
+    const totalCount = loading ? 0 : (searchQuery ? filteredParcelas.length : parcelas.length);
+    const skeletons = Array(5).fill(null);
 
     return (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col">
@@ -49,9 +138,24 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
                     </thead>
                     {/* Table Body */}
                     <tbody className="font-data-tabular text-data-tabular text-on-background divide-y divide-outline-variant">
-                        {filteredParcelas.length > 0 ? (
+                        {loading ? (
+                            skeletons.map((_, i) => <ParcelaRowSkeleton key={i} />)
+                        ) : error ? (
+                            <tr>
+                                <td colSpan={9} className="py-8 px-6 text-center text-error font-medium">
+                                    {error}
+                                </td>
+                            </tr>
+                        ) : filteredParcelas.length > 0 ? (
                             filteredParcelas.map((parcela) => (
-                                <ParcelaRow key={parcela.id} parcela={parcela} />
+                                <ParcelaRow
+                                    key={parcela.id}
+                                    parcela={parcela}
+                                    onAssign={() => onAssignOwner(parcela)}
+                                    onEditParcela={() => onEditParcela(parcela)}
+                                    onEditContrato={() => onEditContrato(parcela)}
+                                    onDeleteParcela={() => onDeleteParcela(parcela)}
+                                />
                             ))
                         ) : (
                             <tr>
@@ -64,11 +168,25 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
                 </table>
             </div>
 
+
             {/* Mobile Cards View */}
             <div className="md:hidden divide-y divide-outline-variant">
-                {filteredParcelas.length > 0 ? (
+                {loading ? (
+                    skeletons.map((_, i) => <ParcelaCardSkeleton key={i} />)
+                ) : error ? (
+                    <div className="py-8 px-4 text-center text-error font-medium text-sm">
+                        {error}
+                    </div>
+                ) : filteredParcelas.length > 0 ? (
                     filteredParcelas.map((parcela) => (
-                        <ParcelaCard key={parcela.id} parcela={parcela} />
+                        <ParcelaCard
+                            key={parcela.id}
+                            parcela={parcela}
+                            onAssign={() => onAssignOwner(parcela)}
+                            onEditParcela={() => onEditParcela(parcela)}
+                            onEditContrato={() => onEditContrato(parcela)}
+                            onDeleteParcela={() => onDeleteParcela(parcela)}
+                        />
                     ))
                 ) : (
                     <div className="py-8 px-4 text-center text-on-surface-variant/70 text-sm">
@@ -80,7 +198,13 @@ export default function ParcelasTable({ searchQuery }: ParcelasTableProps) {
             {/* Pagination Footer */}
             <div className="bg-surface-container-low border-t border-outline-variant p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="font-body-md text-on-surface-variant text-xs sm:text-sm text-center sm:text-left">
-                    Mostrando <span className="font-medium text-on-surface">1</span> a <span className="font-medium text-on-surface">{Math.min(filteredParcelas.length, 5)}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
+                    {loading ? (
+                        "Cargando parcelas..."
+                    ) : (
+                        <>
+                            Mostrando <span className="font-medium text-on-surface">1</span> a <span className="font-medium text-on-surface">{filteredParcelas.length}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
+                        </>
+                    )}
                 </span>
                 <div className="flex items-center gap-2">
                     <button className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer" disabled>

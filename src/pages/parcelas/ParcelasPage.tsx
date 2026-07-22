@@ -1,9 +1,31 @@
 import { useState } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import ParcelasTable from "../../components/parcelas/ParcelasTable";
+import NuevaParcelaModal from "../../components/parcelas/NuevaParcelaModal";
+import EditarParcelaModal from "../../components/parcelas/EditarParcelaModal";
+import AsignarPropietarioModal from "../../components/parcelas/AsignarPropietarioModal";
+import { deleteParcela } from "../../services/api";
+import type { Parcela } from "../../types/parcela";
 
 export default function ParcelasPage() {
     const [searchQuery, setSearchQuery] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+    const [parcelaToEdit, setParcelaToEdit] = useState<Parcela | null>(null);
+
+    const handleDeleteParcela = async (p: Parcela) => {
+        const confirm = window.confirm(`¿Estás seguro de que deseas eliminar la parcela "${p.id}"? Esta acción borrará la parcela permanentemente.`);
+        if (!confirm) return;
+
+        try {
+            await deleteParcela(p.id);
+            setRefreshTrigger((prev) => prev + 1);
+        } catch (err: any) {
+            console.error("Error al eliminar parcela:", err);
+            alert(err.response?.data?.message || "No se puede eliminar la parcela. Podría tener contratos o pagos asociados vigentes.");
+        }
+    };
 
     return (
         <DashboardLayout>
@@ -39,7 +61,10 @@ export default function ParcelasPage() {
                                 Filtros
                             </button>
                             {/* Primary Action (New Parcel) */}
-                            <button className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-lg font-data-tabular text-sm hover:bg-primary-container/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap">
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-lg font-data-tabular text-sm hover:bg-primary-container/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap"
+                            >
                                 <span className="material-symbols-outlined text-[18px]">add</span>
                                 Nueva Parcela
                             </button>
@@ -48,8 +73,38 @@ export default function ParcelasPage() {
                 </div>
 
                 {/* Data Table */}
-                <ParcelasTable searchQuery={searchQuery} />
+                <ParcelasTable
+                    searchQuery={searchQuery}
+                    refreshTrigger={refreshTrigger}
+                    onAssignOwner={(p) => setSelectedParcela(p)}
+                    onEditParcela={(p) => setParcelaToEdit(p)}
+                    onEditContrato={(p) => setSelectedParcela(p)}
+                    onDeleteParcela={handleDeleteParcela}
+                />
             </div>
+
+            {/* Creation Modal */}
+            <NuevaParcelaModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
+            {/* Edit Parcela Modal */}
+            <EditarParcelaModal
+                isOpen={parcelaToEdit !== null}
+                parcela={parcelaToEdit}
+                onClose={() => setParcelaToEdit(null)}
+                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
+            {/* Assignment Modal */}
+            <AsignarPropietarioModal
+                isOpen={selectedParcela !== null}
+                parcela={selectedParcela}
+                onClose={() => setSelectedParcela(null)}
+                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
         </DashboardLayout>
     );
 }

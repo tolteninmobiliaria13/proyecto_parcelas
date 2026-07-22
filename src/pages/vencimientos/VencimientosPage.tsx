@@ -1,25 +1,95 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { matrixData } from '../../data/vencimientos';
+import { getVencimientos, actualizarPago } from '../../services/api';
 import { VencimientosHeader } from '../../components/vencimientos/VencimientosHeader';
 import { VencimientosTable } from '../../components/vencimientos/VencimientosTable';
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 
 export const VencimientosPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedYear, setSelectedYear] = useState('2025');
+    const [selectedYear, setSelectedYear] = useState(String(new Date().getFullYear()));
     const [selectedStatus, setSelectedStatus] = useState('Todos');
     const [selectedCell, setSelectedCell] = useState<{
         lot: LotPaymentMatrix;
         payment: MonthlyPayment;
     } | null>(null);
 
+    // Edit states for individual payments
+    const [editAmount, setEditAmount] = useState(0);
+    const [editDueDate, setEditDueDate] = useState("");
+    const [editPaidDate, setEditPaidDate] = useState("");
+    const [editStatus, setEditStatus] = useState<string>("pending");
+    const [loadingSavePayment, setLoadingSavePayment] = useState(false);
+
+    const [matrixData, setMatrixData] = useState<LotPaymentMatrix[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        setLoading(true);
+        setError(null);
+        getVencimientos(Number(selectedYear))
+            .then((data) => {
+                setMatrixData(data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("Error al obtener matriz de vencimientos:", err);
+                setError("No se pudieron cargar los vencimientos.");
+                setLoading(false);
+            });
+    }, [selectedYear]);
+
+    // Sync selectedCell details to edit form states
+    useEffect(() => {
+        if (selectedCell) {
+            setEditAmount(selectedCell.payment.amount);
+            const toISO = (dateStr?: string) => {
+                if (!dateStr) return "";
+                const parts = dateStr.split("/");
+                if (parts.length === 3) {
+                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+                return dateStr;
+            };
+            setEditDueDate(toISO(selectedCell.payment.dueDate));
+            setEditPaidDate(toISO(selectedCell.payment.paidDate));
+            setEditStatus(selectedCell.payment.status);
+        } else {
+            setEditAmount(0);
+            setEditDueDate("");
+            setEditPaidDate("");
+            setEditStatus("pending");
+        }
+    }, [selectedCell]);
+
+    const handleSavePayment = async () => {
+        if (!selectedCell) return;
+        setLoadingSavePayment(true);
+        try {
+            await actualizarPago(selectedCell.payment.id || '', {
+                monto_cobrar: editAmount,
+                fecha_vencimiento: editDueDate || undefined,
+                fecha_pago_real: editStatus === "paid" ? (editPaidDate || new Date().toISOString().substring(0, 10)) : null,
+                estado: editStatus,
+            });
+            const data = await getVencimientos(Number(selectedYear));
+            setMatrixData(data);
+            setSelectedCell(null);
+        } catch (err: any) {
+            console.error("Error al guardar cuota:", err);
+            alert(err.response?.data?.message || "Ocurrió un error al guardar los cambios de la cuota.");
+        } finally {
+            setLoadingSavePayment(false);
+        }
+    };
+
     // Filtered data
     const filteredData = useMemo(() => {
         return matrixData.filter((row) => {
             const matchesSearch =
-                row.lotNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                row.clientName.toLowerCase().includes(searchTerm.toLowerCase());
+                (row.lotNumber && row.lotNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (row.clientName && row.clientName.toLowerCase().includes(searchTerm.toLowerCase()));
 
             let matchesStatus = true;
             if (selectedStatus === 'Solo Vencidos') {
@@ -30,17 +100,8 @@ export const VencimientosPage = () => {
 
             return matchesSearch && matchesStatus;
         });
-    }, [searchTerm, selectedStatus]);
+    }, [matrixData, searchTerm, selectedStatus]);
 
-
-
-    const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat('es-CL', {
-            style: 'currency',
-            currency: 'CLP',
-            maximumFractionDigits: 0,
-        }).format(val);
-    };
 
     return (
         <DashboardLayout>
@@ -60,6 +121,8 @@ export const VencimientosPage = () => {
                     data={filteredData}
                     selectedYear={selectedYear}
                     onCellClick={(lot, payment) => setSelectedCell({ lot, payment })}
+                    loading={loading}
+                    error={error}
                 />
             </div>
 
@@ -94,54 +157,59 @@ export const VencimientosPage = () => {
                         </div>
 
                         <div className="flex flex-col gap-sm py-xs">
-                            <div className="flex justify-between items-center py-1 border-b border-outline-variant/40">
-                                <span className="text-[13px] text-on-surface-variant">Estado</span>
-                                {selectedCell.payment.status === 'paid' && (
-                                    <span className="px-md py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[12px] font-bold">
-                                        Pagado
-                                    </span>
-                                )}
-                                {selectedCell.payment.status === 'overdue' && (
-                                    <span className="px-md py-0.5 rounded-full bg-rose-100 text-rose-800 text-[12px] font-bold">
-                                        Vencido
-                                    </span>
-                                )}
-                                {selectedCell.payment.status === 'pending' && (
-                                    <span className="px-md py-0.5 rounded-full bg-slate-100 text-slate-700 text-[12px] font-bold">
-                                        Pendiente
-                                    </span>
-                                )}
+                            <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
+                                <span className="text-[13px] text-on-surface-variant font-medium">Estado</span>
+                                <select
+                                    value={editStatus}
+                                    onChange={(e) => setEditStatus(e.target.value)}
+                                    disabled={loadingSavePayment}
+                                    className="px-2 py-1 text-xs border border-outline-variant rounded bg-surface-container-lowest text-on-surface outline-none font-medium cursor-pointer"
+                                >
+                                    <option value="pending">Pendiente</option>
+                                    <option value="paid">Pagado</option>
+                                    <option value="overdue">Vencido</option>
+                                </select>
                             </div>
 
-                            <div className="flex justify-between items-center py-1 border-b border-outline-variant/40">
-                                <span className="text-[13px] text-on-surface-variant">Monto</span>
-                                <span className="text-[14px] font-bold text-on-surface">
-                                    {formatCurrency(selectedCell.payment.amount)}
-                                </span>
+                            <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
+                                <span className="text-[13px] text-on-surface-variant font-medium">Monto CLP</span>
+                                <input
+                                    type="number"
+                                    value={editAmount}
+                                    onChange={(e) => setEditAmount(Number(e.target.value))}
+                                    disabled={loadingSavePayment}
+                                    className="px-2 py-1 text-xs border border-outline-variant rounded bg-surface-container-lowest text-on-surface outline-none w-28 text-right font-mono"
+                                />
                             </div>
 
-                            {selectedCell.payment.dueDate && (
-                                <div className="flex justify-between items-center py-1 border-b border-outline-variant/40">
-                                    <span className="text-[13px] text-on-surface-variant">Vencimiento</span>
-                                    <span className="text-[13px] text-on-surface font-medium">
-                                        {selectedCell.payment.dueDate}
-                                    </span>
+                            <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
+                                <span className="text-[13px] text-on-surface-variant font-medium">Vencimiento</span>
+                                <input
+                                    type="date"
+                                    value={editDueDate}
+                                    onChange={(e) => setEditDueDate(e.target.value)}
+                                    disabled={loadingSavePayment}
+                                    className="px-2 py-1 text-xs border border-outline-variant rounded bg-surface-container-lowest text-on-surface outline-none font-mono cursor-pointer"
+                                />
+                            </div>
+
+                            {editStatus === "paid" && (
+                                <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40 animate-fade-in">
+                                    <span className="text-[13px] text-on-surface-variant font-medium">Fecha de Pago</span>
+                                    <input
+                                        type="date"
+                                        value={editPaidDate}
+                                        onChange={(e) => setEditPaidDate(e.target.value)}
+                                        disabled={loadingSavePayment}
+                                        className="px-2 py-1 text-xs border border-outline-variant rounded bg-surface-container-lowest text-on-surface outline-none font-mono cursor-pointer"
+                                    />
                                 </div>
                             )}
 
-                            {selectedCell.payment.paidDate && (
-                                <div className="flex justify-between items-center py-1 border-b border-outline-variant/40">
-                                    <span className="text-[13px] text-on-surface-variant">Fecha de Pago</span>
-                                    <span className="text-[13px] text-emerald-700 font-medium">
-                                        {selectedCell.payment.paidDate}
-                                    </span>
-                                </div>
-                            )}
-
-                            {selectedCell.payment.receiptNumber && (
-                                <div className="flex justify-between items-center py-1 border-b border-outline-variant/40">
-                                    <span className="text-[13px] text-on-surface-variant">N° Comprobante</span>
-                                    <span className="text-[13px] font-mono text-on-surface">
+                            {selectedCell.payment.receiptNumber && editStatus === "paid" && (
+                                <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
+                                    <span className="text-[13px] text-on-surface-variant font-medium">N° Comprobante</span>
+                                    <span className="text-[13px] font-mono text-on-surface font-semibold">
                                         {selectedCell.payment.receiptNumber}
                                     </span>
                                 </div>
@@ -150,33 +218,31 @@ export const VencimientosPage = () => {
 
                         <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-sm border-t border-outline-variant">
                             <button
+                                type="button"
                                 onClick={() => setSelectedCell(null)}
-                                className="w-full sm:w-auto px-md py-2 border border-outline-variant rounded-lg text-xs sm:text-label-md hover:bg-surface-container transition-colors cursor-pointer text-center"
+                                disabled={loadingSavePayment}
+                                className="w-full sm:w-auto px-md py-2 border border-outline-variant rounded-lg text-xs sm:text-label-md hover:bg-surface-container transition-colors cursor-pointer text-center text-on-surface-variant font-semibold"
                             >
-                                Cerrar
+                                Cancelar
                             </button>
-                            {selectedCell.payment.status !== 'paid' ? (
-                                <button
-                                    onClick={() => {
-                                        alert(`Registrando pago para ${selectedCell.lot.lotNumber}...`);
-                                        setSelectedCell(null);
-                                    }}
-                                    className="w-full sm:w-auto px-md py-2 bg-primary text-on-primary rounded-lg text-xs sm:text-label-md hover:bg-primary/90 flex items-center justify-center gap-xs cursor-pointer"
-                                >
-                                    <span className="material-symbols-outlined text-[18px]">payments</span>
-                                    Registrar Pago
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => {
-                                        alert(`Generando comprobante ${selectedCell.payment.receiptNumber}...`);
-                                    }}
-                                    className="w-full sm:w-auto px-md py-2 bg-emerald-600 text-white rounded-lg text-xs sm:text-label-md hover:bg-emerald-700 flex items-center justify-center gap-xs cursor-pointer"
-                                >
-                                    <span className="material-symbols-outlined text-[18px]">receipt</span>
-                                    Ver Comprobante
-                                </button>
-                            )}
+                            <button
+                                type="button"
+                                onClick={handleSavePayment}
+                                disabled={loadingSavePayment}
+                                className="w-full sm:w-auto px-md py-2 bg-primary text-on-primary rounded-lg text-xs sm:text-label-md hover:bg-primary/90 flex items-center justify-center gap-xs cursor-pointer disabled:opacity-50 font-bold shadow-xs"
+                            >
+                                {loadingSavePayment ? (
+                                    <>
+                                        <div className="w-3.5 h-3.5 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></div>
+                                        <span>Guardando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className="material-symbols-outlined text-[18px]">save</span>
+                                        <span>Guardar Cambios</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>

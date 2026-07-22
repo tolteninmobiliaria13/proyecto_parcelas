@@ -12,6 +12,11 @@ export const menuItems: MenuItem[] = [
         icon: "location_on",
     },
     {
+        title: "Clientes",
+        path: "/clientes",
+        icon: "group",
+    },
+    {
         title: "Vencimientos",
         path: "/vencimientos",
         icon: "event_busy",

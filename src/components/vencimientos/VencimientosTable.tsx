@@ -6,12 +6,36 @@ interface VencimientosTableProps {
   data: LotPaymentMatrix[];
   selectedYear?: string;
   onCellClick?: (lot: LotPaymentMatrix, payment: MonthlyPayment) => void;
+  loading?: boolean;
+  error?: string | null;
+}
+
+function VencimientosRowSkeleton({ monthsCount }: { monthsCount: number }) {
+  return (
+    <tr className="animate-pulse">
+      <td className="p-md sticky left-0 z-10 bg-surface-container-lowest border-r border-outline-variant">
+        <div className="h-4 bg-outline-variant/30 rounded w-12 mb-2"></div>
+        <div className="h-3 bg-outline-variant/30 rounded w-24"></div>
+      </td>
+      <td className="p-md border-r border-outline-variant bg-surface-container-lowest/50 text-center">
+        <div className="h-4 bg-outline-variant/30 rounded-full w-8 mx-auto mb-1"></div>
+        <div className="h-1.5 bg-outline-variant/30 rounded w-16 mx-auto"></div>
+      </td>
+      {Array(monthsCount).fill(null).map((_, i) => (
+        <td key={i} className="p-xs border-r border-outline-variant text-center">
+          <div className="h-10 bg-outline-variant/20 rounded w-16 mx-auto"></div>
+        </td>
+      ))}
+    </tr>
+  );
 }
 
 export const VencimientosTable = ({
   data,
   selectedYear = '2025',
   onCellClick,
+  loading = false,
+  error = null,
 }: VencimientosTableProps) => {
   const months = monthsList;
 
@@ -79,7 +103,20 @@ export const VencimientosTable = ({
             </tr>
           </thead>
           <tbody className="font-data-tabular text-data-tabular divide-y divide-outline-variant">
-            {data.length === 0 ? (
+            {loading ? (
+              Array(3).fill(null).map((_, i) => (
+                <VencimientosRowSkeleton key={i} monthsCount={months.length} />
+              ))
+            ) : error ? (
+              <tr>
+                <td
+                  colSpan={months.length + 2}
+                  className="p-xl text-center text-error font-medium"
+                >
+                  {error}
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
               <tr>
                 <td
                   colSpan={months.length + 2}

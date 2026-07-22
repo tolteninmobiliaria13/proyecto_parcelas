@@ -1,6 +1,7 @@
-export type PaymentStatus = 'paid' | 'overdue' | 'pending';
+export type PaymentStatus = 'paid' | 'overdue' | 'pending' | 'none';
 
 export interface MonthlyPayment {
+  id?: string;
   month: string;
   year: number;
   status: PaymentStatus;

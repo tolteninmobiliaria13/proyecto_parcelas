@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createPortal } from "react-dom";
 import type { Lot } from "../../../types/lots";
 import LotStatus from "./LotStatus";
 
@@ -18,29 +19,69 @@ function getInitials(name: string) {
 function RowActionsMenu() {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [coords, setCoords] = useState({ top: 0, left: 0 });
+
+    const handleToggle = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            setCoords({
+                top: rect.bottom + window.scrollY,
+                left: rect.right - 176 + window.scrollX,
+            });
+        }
+        setIsOpen(!isOpen);
+    };
+
+    useEffect(() => {
+        const updateCoords = () => {
+            if (isOpen && buttonRef.current) {
+                const rect = buttonRef.current.getBoundingClientRect();
+                setCoords({
+                    top: rect.bottom + window.scrollY,
+                    left: rect.right - 176 + window.scrollX,
+                });
+            }
+        };
+
+        if (isOpen) {
+            window.addEventListener("scroll", updateCoords, true);
+            window.addEventListener("resize", updateCoords);
+        }
+        return () => {
+            window.removeEventListener("scroll", updateCoords, true);
+            window.removeEventListener("resize", updateCoords);
+        };
+    }, [isOpen]);
 
     return (
         <div className="relative">
             <button
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setIsOpen(!isOpen);
-                }}
+                ref={buttonRef}
+                onClick={handleToggle}
                 className="text-on-surface-variant hover:text-primary transition-colors opacity-70 hover:opacity-100 cursor-pointer p-1 rounded-md hover:bg-surface-container flex items-center justify-center"
                 aria-label="Opciones de lote"
             >
                 <span className="material-symbols-outlined text-[20px]">more_vert</span>
             </button>
 
-            {isOpen && (
+            {isOpen && createPortal(
                 <>
                     {/* Backdrop para cerrar al hacer clic fuera */}
                     <div
                         onClick={() => setIsOpen(false)}
-                        className="fixed inset-0 z-30"
+                        className="fixed inset-0 z-[100]"
                     />
 
-                    <div className="absolute right-0 mt-1 w-44 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-40 text-left font-body-md animate-fade-in">
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: `${coords.top}px`,
+                            left: `${coords.left}px`,
+                        }}
+                        className="w-44 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-[101] text-left font-body-md animate-fade-in"
+                    >
                         <button
                             onClick={() => {
                                 setIsOpen(false);
@@ -62,7 +103,8 @@ function RowActionsMenu() {
                             <span>Ver pagos</span>
                         </button>
                     </div>
-                </>
+                </>,
+                document.body
             )}
         </div>
     );
@@ -93,7 +135,7 @@ export function LotCard({ lot }: LotRowProps) {
                 <div>
                     <span className="text-on-surface-variant block text-[11px]">Saldo</span>
                     <span className="font-semibold text-on-surface text-sm">
-                        $ {lot.downPayment.toLocaleString("es-CL", {
+                        $ {lot.balance.toLocaleString("es-CL", {
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 0,
                         })}
@@ -128,7 +170,7 @@ export default function LotRow({ lot }: LotRowProps) {
                 </div>
             </td>
             <td className="py-4 px-6 text-center whitespace-nowrap font-medium text-on-surface border-r border-outline-variant">
-                $ {lot.downPayment.toLocaleString("es-CL", {
+                $ {lot.balance.toLocaleString("es-CL", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
                 })}
