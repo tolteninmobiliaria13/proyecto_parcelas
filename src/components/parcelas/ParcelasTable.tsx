@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import useSWR from "swr";
 import type { Parcela } from "../../types/parcela";
 import { getParcelas } from "../../services/api";
 import ParcelaRow, { ParcelaCard } from "./ParcelaRow";
@@ -77,22 +78,24 @@ export default function ParcelasTable({
     onEditContrato,
     onDeleteParcela,
 }: ParcelasTableProps) {
-    const [parcelas, setParcelas] = useState<Parcela[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const limit = 20;
+
+    const { data, error, isLoading, mutate } = useSWR(
+        ['parcelas', page, limit],
+        ([_, p, l]) => getParcelas(p as number, l as number),
+        { keepPreviousData: true }
+    );
 
     useEffect(() => {
-        getParcelas()
-            .then((data) => {
-                setParcelas(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error al obtener listado de parcelas:", err);
-                setError("No se pudieron cargar las parcelas.");
-                setLoading(false);
-            });
-    }, [refreshTrigger]);
+        if (refreshTrigger > 0) {
+            mutate();
+        }
+    }, [refreshTrigger, mutate]);
+
+    const parcelas = data?.items || [];
+    const totalCount = data?.total || 0;
+    const totalPages = data?.pages || 1;
 
     // Client-side filtering by id (lote) or owner (propietario)
     const filteredParcelas = parcelas.filter((parcela) => {
@@ -104,8 +107,8 @@ export default function ParcelasTable({
         );
     });
 
-    const totalCount = loading ? 0 : (searchQuery ? filteredParcelas.length : parcelas.length);
-    const skeletons = Array(5).fill(null);
+    const displayCount = searchQuery ? filteredParcelas.length : totalCount;
+    const skeletons = Array(limit).fill(null);
 
     return (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col">
@@ -116,6 +119,9 @@ export default function ParcelasTable({
                     <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
                         Listado actualizado de roles, propietarios, montos y estado de escritura.
                     </p>
+                </div>
+                <div className="text-sm font-medium text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant">
+                    {displayCount} Registros (Página {page} de {totalPages})
                 </div>
             </div>
 
@@ -138,12 +144,12 @@ export default function ParcelasTable({
                     </thead>
                     {/* Table Body */}
                     <tbody className="font-data-tabular text-data-tabular text-on-background divide-y divide-outline-variant">
-                        {loading ? (
+                        {isLoading ? (
                             skeletons.map((_, i) => <ParcelaRowSkeleton key={i} />)
                         ) : error ? (
                             <tr>
                                 <td colSpan={9} className="py-8 px-6 text-center text-error font-medium">
-                                    {error}
+                                    {error.message || "Error"}
                                 </td>
                             </tr>
                         ) : filteredParcelas.length > 0 ? (
@@ -171,11 +177,11 @@ export default function ParcelasTable({
 
             {/* Mobile Cards View */}
             <div className="md:hidden divide-y divide-outline-variant">
-                {loading ? (
+                {isLoading ? (
                     skeletons.map((_, i) => <ParcelaCardSkeleton key={i} />)
                 ) : error ? (
                     <div className="py-8 px-4 text-center text-error font-medium text-sm">
-                        {error}
+                        {error.message || "Error"}
                     </div>
                 ) : filteredParcelas.length > 0 ? (
                     filteredParcelas.map((parcela) => (
@@ -198,26 +204,30 @@ export default function ParcelasTable({
             {/* Pagination Footer */}
             <div className="bg-surface-container-low border-t border-outline-variant p-4 sm:px-6 sm:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <span className="font-body-md text-on-surface-variant text-xs sm:text-sm text-center sm:text-left">
-                    {loading ? (
+                    {isLoading ? (
                         "Cargando parcelas..."
                     ) : (
                         <>
-                            Mostrando <span className="font-medium text-on-surface">1</span> a <span className="font-medium text-on-surface">{filteredParcelas.length}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
+                            Mostrando <span className="font-medium text-on-surface">{(page - 1) * limit + 1}</span> a <span className="font-medium text-on-surface">{Math.min(page * limit, totalCount)}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
                         </>
                     )}
                 </span>
                 <div className="flex items-center gap-2">
-                    <button className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer" disabled>
+                    <button 
+                        onClick={() => setPage(Math.max(1, page - 1))}
+                        disabled={page === 1}
+                        className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
                         <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                     </button>
                     <div className="flex items-center gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-md bg-primary-container text-on-primary-container font-data-tabular text-xs sm:text-sm font-medium cursor-pointer">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-md text-on-surface hover:bg-surface-container font-data-tabular text-xs sm:text-sm transition-colors cursor-pointer">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-md text-on-surface hover:bg-surface-container font-data-tabular text-xs sm:text-sm transition-colors cursor-pointer">3</button>
-                        <span className="w-6 h-8 flex items-center justify-center text-on-surface-variant text-xs">...</span>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-md text-on-surface hover:bg-surface-container font-data-tabular text-xs sm:text-sm transition-colors cursor-pointer">30</button>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-md bg-primary-container text-on-primary-container font-data-tabular text-xs sm:text-sm font-medium cursor-pointer">{page}</button>
                     </div>
-                    <button className="p-1 rounded text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+                    <button 
+                        onClick={() => setPage(Math.min(totalPages, page + 1))}
+                        disabled={page >= totalPages}
+                        className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                    >
                         <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                     </button>
                 </div>

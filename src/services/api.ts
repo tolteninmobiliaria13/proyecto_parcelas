@@ -84,29 +84,26 @@ export const getDashboardStats = async (): Promise<DashboardStat[]> => {
     return stats;
 };
 
+export interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    page: number;
+    pages: number;
+}
+
 /**
  * Obtiene el listado de lotes/contratos con deuda para el panel principal.
  */
-export const getDashboardLots = async (): Promise<Lot[]> => {
-    const cacheKey = 'dashboard_lots';
-    if (memoryCache[cacheKey]) {
-        return memoryCache[cacheKey];
-    }
-    const response = await apiClient.get<Lot[]>('/dashboard/lots');
-    memoryCache[cacheKey] = response.data;
+export const getDashboardLots = async (page: number = 1, limit: number = 20): Promise<PaginatedResponse<Lot>> => {
+    const response = await apiClient.get<PaginatedResponse<Lot>>(`/dashboard/lots?page=${page}&limit=${limit}`);
     return response.data;
 };
 
 /**
  * Obtiene la lista de parcelas registradas.
  */
-export const getParcelas = async (): Promise<Parcela[]> => {
-    const cacheKey = 'parcelas';
-    if (memoryCache[cacheKey]) {
-        return memoryCache[cacheKey];
-    }
-    const response = await apiClient.get<Parcela[]>('/parcelas/');
-    memoryCache[cacheKey] = response.data;
+export const getParcelas = async (page: number = 1, limit: number = 20): Promise<PaginatedResponse<Parcela>> => {
+    const response = await apiClient.get<PaginatedResponse<Parcela>>(`/parcelas/?page=${page}&limit=${limit}`);
     return response.data;
 };
 
@@ -344,4 +341,47 @@ export const getContratoDetalle = async (loteId: string): Promise<ContratoDetall
     return response.data;
 };
 
+export interface ReporteItem {
+    numero_lote: string;
+    propietario: string;
+    estado: string;
+    saldo_fmt: string;
+    proximo_vencimiento: string;
+    ultimo_pago: string;
+}
+
+export interface ReporteData {
+    proyecto_nombre: string;
+    periodo: string;
+    fecha_emision: string;
+    resumen_ejecutivo: {
+        facturacion_periodo_fmt: string;
+        cobranza_efectiva_fmt: string;
+        recuperacion_mora_fmt: string;
+        cobranza_corriente_fmt: string;
+        cuentas_por_cobrar_fmt: string;
+    };
+    estado_cobranza: {
+        estado: string;
+        lotes: number;
+        monto_fmt: string;
+    }[];
+    total_estado_cobranza: {
+        lotes: number;
+        monto_fmt: string;
+    };
+    detalles: ReporteItem[];
+}
+
+/**
+ * Obtiene los datos del reporte de pagos del mes presente desde la API REST.
+ */
+export const getReporteData = async (): Promise<ReporteData> => {
+    const response = await apiClient.get<ReporteData>('/vencimientos/reporte-data');
+    return response.data;
+};
+
 export default apiClient;
+
+
+

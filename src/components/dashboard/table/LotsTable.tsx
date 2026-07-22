@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import type { Lot } from "../../../types/lots";
 import { getDashboardLots } from "../../../services/api";
 import LotRow, { LotCard } from "./LotRow";
@@ -90,7 +91,7 @@ const TABS: { key: TabKey; label: string; icon: string; emptyText: string }[] = 
 interface TablePanelProps {
     rows: Lot[];
     loading: boolean;
-    error: string | null;
+    error: any;
     emptyText: string;
 }
 
@@ -98,47 +99,55 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
     const skeletons = Array(3).fill(null);
     return (
         <>
-            {/* Desktop */}
+            {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[700px]">
-                    <thead className="bg-surface-container-low font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">
+                <table className="w-full text-left border-collapse min-w-[800px]">
+                    <thead className="bg-surface-container-low border-b border-outline-variant">
                         <tr className="text-center">
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Lote</th>
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Comprador</th>
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Saldo</th>
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Próximo Vencimiento</th>
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Estado</th>
-                            <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center">Acciones</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Lote</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Propietario</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Deuda / Cuota</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Vencimiento</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Estado</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="font-data-tabular text-data-tabular text-on-surface divide-y divide-outline-variant">
+                    <tbody className="divide-y divide-outline-variant font-data-tabular text-data-tabular">
                         {loading ? (
                             skeletons.map((_, i) => <LotRowSkeleton key={i} />)
                         ) : error ? (
                             <tr>
-                                <td colSpan={6} className="py-8 px-6 text-center text-error font-medium">{error}</td>
+                                <td colSpan={6} className="py-8 px-6 text-center text-error font-medium">
+                                    {error.message || "Error al cargar"}
+                                </td>
                             </tr>
                         ) : rows.length > 0 ? (
-                            rows.map((lot) => <LotRow key={lot.id} lot={lot} />)
+                            rows.map((row) => <LotRow key={row.id} lot={row} />)
                         ) : (
                             <tr>
-                                <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant/70">{emptyText}</td>
+                                <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant/70">
+                                    {emptyText}
+                                </td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Mobile */}
+            {/* Mobile Cards */}
             <div className="md:hidden divide-y divide-outline-variant">
                 {loading ? (
                     skeletons.map((_, i) => <LotCardSkeleton key={i} />)
                 ) : error ? (
-                    <div className="p-6 text-center text-error text-sm font-medium">{error}</div>
+                    <div className="py-8 px-4 text-center text-error font-medium text-sm">
+                        {error.message || "Error al cargar"}
+                    </div>
                 ) : rows.length > 0 ? (
-                    rows.map((lot) => <LotCard key={lot.id} lot={lot} />)
+                    rows.map((row) => <LotCard key={row.id} lot={row} />)
                 ) : (
-                    <div className="p-6 text-center text-on-surface-variant/70 text-sm">{emptyText}</div>
+                    <div className="py-8 px-4 text-center text-on-surface-variant/70 text-sm">
+                        {emptyText}
+                    </div>
                 )}
             </div>
         </>
@@ -148,23 +157,14 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function LotsTable() {
-    const [lots, setLots] = useState<Lot[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<TabKey>("morosos");
 
-    useEffect(() => {
-        getDashboardLots()
-            .then((data) => {
-                setLots(data);
-                setLoading(false);
-            })
-            .catch((err) => {
-                console.error("Error al obtener contratos:", err);
-                setError("No se pudieron obtener los registros.");
-                setLoading(false);
-            });
-    }, []);
+    const { data, error, isLoading } = useSWR(
+        ['dashboard_lots'],
+        () => getDashboardLots(1, 1000),
+        { keepPreviousData: true }
+    );
+    const lots = data?.items || [];
 
     // Clasificación: excluir completamente pagados (sin balance y sin nextDueDate)
     const morosos = lots.filter((l) => l.status === "overdue");
@@ -195,7 +195,7 @@ export default function LotsTable() {
                 <div className="flex gap-0 mt-3 px-4 sm:px-lg overflow-x-auto">
                     {TABS.map((tab) => {
                         const isActive = activeTab === tab.key;
-                        const count = loading ? null : counts[tab.key];
+                        const count = isLoading ? null : counts[tab.key];
                         return (
                             <button
                                 key={tab.key}
@@ -232,7 +232,7 @@ export default function LotsTable() {
             {/* Content panel */}
             <TablePanel
                 rows={activeRows}
-                loading={loading}
+                loading={isLoading}
                 error={error}
                 emptyText={activeTab_.emptyText}
             />
@@ -240,7 +240,7 @@ export default function LotsTable() {
             {/* Footer */}
             <div className="p-4 sm:px-6 sm:py-4 border-t border-outline-variant bg-surface-container-low flex justify-between items-center gap-3 text-xs sm:text-sm font-body-md text-on-surface-variant">
                 <span>
-                    {loading
+                    {isLoading
                         ? "Cargando registros..."
                         : `Mostrando ${activeRows.length} registros`}
                 </span>
