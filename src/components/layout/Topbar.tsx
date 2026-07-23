@@ -1,7 +1,9 @@
 
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { getNotificationsSummary } from "../../services/api";
+import type { NotificationsSummary } from "../../types/auth";
 
 type TopbarProps = {
     onMenuClick?: () => void;
@@ -11,15 +13,52 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
     const navigate = useNavigate();
     const { user, signOut } = useAuth();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<NotificationsSummary | null>(null);
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            const data = await getNotificationsSummary();
+            setNotifications(data);
+
+            // Si hay notificaciones activas y no han sido ignoradas en esta sesión, abrir el panel automáticamente
+            const isDismissed = sessionStorage.getItem("notifications_dismissed") === "true";
+            if (data && data.total_count > 0 && !isDismissed) {
+                setIsNotificationsOpen(true);
+            }
+        };
+
+        fetchNotifications();
+        // Polling cada 30 segundos
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
+    const handleIgnoreNotifications = () => {
+        sessionStorage.setItem("notifications_dismissed", "true");
+        setIsNotificationsOpen(false);
+    };
 
     const handleLogout = async () => {
         try {
             await signOut();
             navigate("/");
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error);
+        } catch {
+            // Manejado silenciosamente
         }
     };
+
+    // Iniciales para el avatar cuando no hay foto de Google
+    const getInitials = () => {
+        const name = user?.user_metadata?.full_name || user?.email || "U";
+        const parts = name.trim().split(" ");
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+
+    const hasAvatar = Boolean(user?.user_metadata?.avatar_url);
 
     return (
         <header className="fixed top-0 right-0 left-0 lg:left-[260px] h-16 bg-surface-container-lowest text-primary border-b border-outline-variant flex justify-between items-center px-4 sm:px-lg z-20 transition-all">
@@ -39,24 +78,114 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             </div>
 
             <div className="flex items-center gap-sm sm:gap-md shrink-0">
-                <button className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors relative cursor-pointer">
-                    <span className="material-symbols-outlined text-[22px]">notifications</span>
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-error rounded-full"></span>
-                </button>
+                {/* Notificaciones */}
+                <div className="relative">
+                    <button
+                        onClick={() => {
+                            setIsNotificationsOpen(!isNotificationsOpen);
+                            setIsDropdownOpen(false);
+                        }}
+                        className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors relative cursor-pointer"
+                        title="Notificaciones"
+                    >
+                        <span className="material-symbols-outlined text-[22px]">notifications</span>
+                        {notifications && notifications.total_count > 0 && (
+                            <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 bg-error text-on-error text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse">
+                                {notifications.total_count}
+                            </span>
+                        )}
+                    </button>
+
+                    {/* Popover de Notificaciones */}
+                    {isNotificationsOpen && (
+                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl py-2 z-30 divide-y divide-outline-variant/40 animate-fade-in">
+                            <div className="px-4 py-2.5 flex items-center justify-between">
+                                <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+                                    <span className="material-symbols-outlined text-[16px] text-primary">notifications_active</span>
+                                    Notificaciones del Sistema
+                                </h3>
+                                <button
+                                    onClick={handleIgnoreNotifications}
+                                    className="text-[11px] font-medium px-2 py-1 rounded bg-surface-container-low hover:bg-surface-container text-on-surface-variant transition-colors flex items-center gap-1 cursor-pointer"
+                                    title="Ignorar notificaciones por esta sesión"
+                                >
+                                    <span className="material-symbols-outlined text-[14px]">visibility_off</span>
+                                    Ignorar
+                                </button>
+                            </div>
+
+                            <div className="max-h-80 overflow-y-auto divide-y divide-outline-variant/20">
+                                {!notifications || notifications.items.length === 0 ? (
+                                    <div className="p-6 text-center text-xs text-on-surface-variant flex flex-col items-center gap-1">
+                                        <span className="material-symbols-outlined text-[28px] text-emerald-500">check_circle</span>
+                                        <span>No hay alertas ni notificaciones pendientes.</span>
+                                    </div>
+                                ) : (
+                                    notifications.items.map((item) => (
+                                        <Link
+                                            key={item.id}
+                                            to={item.link || "#"}
+                                            onClick={() => setIsNotificationsOpen(false)}
+                                            className="p-3 hover:bg-surface-container-low flex items-start gap-3 transition-colors block text-left"
+                                        >
+                                            <div className={`p-2 rounded-full shrink-0 ${
+                                                item.tipo === "usuario_pendiente"
+                                                    ? "bg-amber-500/10 text-amber-600"
+                                                    : "bg-error/10 text-error"
+                                            }`}>
+                                                <span className="material-symbols-outlined text-[18px]">
+                                                    {item.tipo === "usuario_pendiente" ? "person_add" : "event_upcoming"}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-semibold text-on-surface truncate">{item.titulo}</p>
+                                                <p className="text-[11px] text-on-surface-variant line-clamp-2 mt-0.5">{item.descripcion}</p>
+                                                <span className="text-[10px] text-on-surface-variant/60 mt-1 block">{item.fecha}</span>
+                                            </div>
+                                        </Link>
+                                    ))
+                                )}
+                            </div>
+
+                            {notifications && notifications.items.length > 0 && (
+                                <div className="px-4 py-2 flex justify-between items-center bg-surface-container-low/40">
+                                    <span className="text-[10px] text-on-surface-variant">
+                                        {notifications.total_count} alerta(s) requiere(n) atención
+                                    </span>
+                                    <button
+                                        onClick={handleIgnoreNotifications}
+                                        className="text-xs font-semibold text-primary hover:underline cursor-pointer"
+                                    >
+                                        Entendido / Ignorar
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
 
                 <div className="h-6 sm:h-8 w-px bg-outline-variant mx-1 sm:mx-2"></div>
 
-                {/* Contenedor relativo para posicionar el dropdown */}
+                {/* Dropdown de Perfil / Logout */}
                 <div className="relative">
                     <button
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        onClick={() => {
+                            setIsDropdownOpen(!isDropdownOpen);
+                            setIsNotificationsOpen(false);
+                        }}
                         className="flex items-center gap-xs sm:gap-sm hover:bg-surface-container-low transition-colors p-1 pr-2 sm:pr-3 rounded-full cursor-pointer"
                     >
-                        <img
-                            alt={user?.user_metadata?.full_name || "Avatar del Administrador"}
-                            className="w-8 h-8 rounded-full object-cover shadow-sm bg-surface-dim"
-                            src={user?.user_metadata?.avatar_url || "https://lh3.googleusercontent.com/aida-public/AB6AXuDEPFYWV-6_4FzgzFAPWAdkefGTSnW4N0KfRuK2YA4BEZpxsrrKstt2XV2tpcszhqGlri9nih469rBfSxDMQ9XFKqnYjy38ktTt-mFqbmkz3Rd8pIoPTDadin81b8s641e_ZNFZQ-ADJQq55nUop7_8Lm4qOdgGROlJvd1vMaNHRQ-MhYCUhnTD2hbMR1HiyR4HgcAT-ebURGXBbA13w9bs2JWYbH6LHARKghd7S84aHGQjmit5nYKY5Q"}
-                        />
+                        {hasAvatar ? (
+                            <img
+                                alt={user?.user_metadata?.full_name || "Avatar"}
+                                className="w-8 h-8 rounded-full object-cover shadow-xs bg-surface-dim"
+                                src={user?.user_metadata?.avatar_url}
+                            />
+                        ) : (
+                            <div className="w-8 h-8 rounded-full bg-primary text-on-primary font-bold text-xs flex items-center justify-center shadow-xs">
+                                {getInitials()}
+                            </div>
+                        )}
                         <span className="material-symbols-outlined text-on-surface-variant text-[20px]">
                             {isDropdownOpen ? "expand_less" : "expand_more"}
                         </span>
@@ -64,12 +193,18 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
                     {/* Menú desplegable */}
                     {isDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-surface-container-lowest border border-outline-variant rounded-md shadow-lg py-2 z-30">
+                        <div className="absolute right-0 mt-2 w-52 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-lg py-2 z-30">
+                            <div className="px-4 py-2 border-b border-outline-variant/40 mb-1">
+                                <p className="text-xs font-bold text-on-surface truncate">
+                                    {user?.user_metadata?.full_name || user?.email}
+                                </p>
+                                <p className="text-[10px] text-on-surface-variant truncate">{user?.email}</p>
+                            </div>
                             <button
                                 onClick={handleLogout}
-                                className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-3 cursor-pointer text-sm font-medium"
+                                className="w-full text-left px-4 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-3 cursor-pointer text-xs font-medium"
                             >
-                                <span className="material-symbols-outlined text-[20px]">logout</span>
+                                <span className="material-symbols-outlined text-[18px]">logout</span>
                                 Cerrar sesión
                             </button>
                         </div>

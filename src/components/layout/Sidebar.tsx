@@ -10,7 +10,7 @@ type SidebarProps = {
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const navigate = useNavigate();
-    const { signOut } = useAuth();
+    const { signOut, role } = useAuth();
 
     const handleLogout = async () => {
         if (onClose) onClose();
@@ -62,6 +62,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             />
                         </li>
                     ))}
+                    {role === "admin" && (
+                        <li>
+                            <NavItem
+                                title="Usuarios"
+                                path="/dashboard/usuarios"
+                                icon="admin_panel_settings"
+                                onClick={onClose}
+                            />
+                        </li>
+                    )}
                 </ul>
 
                 {/* Contenedor del botón de Cerrar Sesión empujado hacia abajo con mt-auto */}

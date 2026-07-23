@@ -373,11 +373,80 @@ export interface ReporteData {
     detalles: ReporteItem[];
 }
 
+import type { CheckAuthResponse, UsuarioPermitido, UsuarioPermitidoInput, NotificationsSummary } from '../types/auth';
+
+/**
+ * Obtiene el resumen de notificaciones (usuarios pendientes + cuotas que vencen hoy).
+ */
+export const getNotificationsSummary = async (): Promise<NotificationsSummary> => {
+    try {
+        const response = await apiClient.get<NotificationsSummary>('/auth/notifications');
+        return response.data;
+    } catch (error) {
+        console.error("Error al obtener notificaciones:", error);
+        return {
+            total_count: 0,
+            pending_users_count: 0,
+            due_today_count: 0,
+            items: []
+        };
+    }
+};
+
 /**
  * Obtiene los datos del reporte de pagos del mes presente desde la API REST.
  */
 export const getReporteData = async (): Promise<ReporteData> => {
     const response = await apiClient.get<ReporteData>('/vencimientos/reporte-data');
+    return response.data;
+};
+
+/**
+ * Verifica si un correo está autorizado para acceder al sistema y obtiene su rol.
+ */
+export const checkUserPermission = async (email: string): Promise<CheckAuthResponse> => {
+    try {
+        const response = await apiClient.get<CheckAuthResponse>(`/auth/check?email=${encodeURIComponent(email)}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error al verificar permisos del usuario:", error);
+        return {
+            is_authorized: false,
+            email,
+            message: "No se pudo verificar la autorización del correo con el servidor."
+        };
+    }
+};
+
+/**
+ * Obtiene la lista de todos los usuarios permitidos (Solo Administradores).
+ */
+export const getUsuariosPermitidos = async (): Promise<UsuarioPermitido[]> => {
+    const response = await apiClient.get<UsuarioPermitido[]>('/auth/usuarios');
+    return response.data;
+};
+
+/**
+ * Agrega un nuevo usuario permitido.
+ */
+export const createUsuarioPermitido = async (data: UsuarioPermitidoInput): Promise<UsuarioPermitido> => {
+    const response = await apiClient.post<UsuarioPermitido>('/auth/usuarios', data);
+    return response.data;
+};
+
+/**
+ * Actualiza un usuario permitido (rol, activo, nombre).
+ */
+export const updateUsuarioPermitido = async (id: string, data: Partial<UsuarioPermitidoInput>): Promise<UsuarioPermitido> => {
+    const response = await apiClient.patch<UsuarioPermitido>(`/auth/usuarios/${id}`, data);
+    return response.data;
+};
+
+/**
+ * Elimina un usuario permitido.
+ */
+export const deleteUsuarioPermitido = async (id: string): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/auth/usuarios/${id}`);
     return response.data;
 };
 

@@ -5,8 +5,9 @@ import DashboardPage from "../pages/dashboard/Dashboardpage";
 import ParcelasPage from "../pages/parcelas/ParcelasPage";
 import ClientesPage from "../pages/clientes/ClientesPage";
 import VencimientosPage from "../pages/vencimientos/VencimientosPage";
+import Usuarios from "../pages/usuarios/Usuarios";
 import ProtectedRoute from "./ProtectedRoute";
-
+import AdminRoute from "./AdminRoute";
 
 export default function AppRouter() {
     return (
@@ -38,9 +39,14 @@ export default function AppRouter() {
                         path="/vencimientos"
                         element={<VencimientosPage />}
                     />
+
+                    <Route element={<AdminRoute />}>
+                        <Route
+                            path="/dashboard/usuarios"
+                            element={<Usuarios />}
+                        />
+                    </Route>
                 </Route>
-
-
 
             </Routes>
         </BrowserRouter>
