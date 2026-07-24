@@ -99,15 +99,15 @@ export default function AsignarPropietarioModal({
         }
     }, [isOpen, parcela, isEditMode]);
 
-    // Auto-calculate suggested installment amount (only for new assignment)
+    // Auto-calculate suggested installment amount
     useEffect(() => {
-        if (parcela && !isEditMode) {
+        if (parcela) {
             const pie = Number(pieInicial) || 0;
             const cuotas = Number(totalCuotas) || 1;
             const suggestion = Math.max(0, Math.round((parcela.precioVenta - pie) / cuotas));
             setMontoCuota(String(suggestion));
         }
-    }, [parcela, pieInicial, totalCuotas, isEditMode]);
+    }, [parcela, pieInicial, totalCuotas]);
 
 
     if (!isOpen || !parcela) return null;
