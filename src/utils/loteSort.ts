@@ -60,6 +60,6 @@ export function sortParcelasByLote<T>(
     items: T[],
     getLoteNumber?: (item: T) => string
 ): T[] {
-    const getKey = getLoteNumber || ((item: any) => item.lotNumber || item.id || item.numero_lote || "");
+    const getKey = getLoteNumber || ((item: any) => item.lot || item.lotNumber || item.numero_lote || item.id || "");
     return [...items].sort((a, b) => compareLotes(getKey(a), getKey(b)));
 }

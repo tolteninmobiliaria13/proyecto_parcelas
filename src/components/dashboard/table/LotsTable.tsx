@@ -175,7 +175,7 @@ export default function LotsTable() {
 
     const counts: Record<TabKey, number> = { morosos: morosos.length, pendientes: pendientes.length };
     const rawActiveRows = activeTab === "morosos" ? morosos : pendientes;
-    const activeRows = sortParcelasByLote(rawActiveRows);
+    const activeRows = sortParcelasByLote(rawActiveRows, (l) => l.lot);
     const activeTab_ = TABS.find((t) => t.key === activeTab)!;
 
     return (
