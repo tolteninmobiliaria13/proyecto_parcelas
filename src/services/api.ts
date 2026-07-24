@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { supabase } from './supabase';
 import type { DashboardStat } from '../data/dashboard';
 import type { Lot } from '../types/lots';
 import type { Parcela } from '../types/parcela';
@@ -7,6 +8,22 @@ import type { LotPaymentMatrix, MonthlyPayment } from '../types/payment';
 // Cliente Axios centralizado
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+});
+
+// Interceptor para inyectar automáticamente la identidad y credenciales en cada petición a la API
+apiClient.interceptors.request.use(async (config) => {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session && session.user && session.user.email) {
+            config.headers['X-User-Email'] = session.user.email;
+            if (session.access_token) {
+                config.headers['Authorization'] = `Bearer ${session.access_token}`;
+            }
+        }
+    } catch {
+        // Si no hay sesión previa, continúa con las cabeceras estándar
+    }
+    return config;
 });
 
 // Memory cache for API responses to guarantee instant screen transitions (0ms delay)

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { checkUserPermission } from "../../services/api";
 
 export default function Login() {
     const { user, loading, signInWithGoogle, signInWithEmail, signUpWithEmail, authError, clearAuthError } = useAuth();
@@ -24,7 +25,8 @@ export default function Login() {
 
     const handleEmailAuth = async (e: FormEvent) => {
         e.preventDefault();
-        if (!email || !password) {
+        const cleanEmail = email.trim().toLowerCase();
+        if (!cleanEmail || !password) {
             setErrorMsg("Por favor, ingresa tu correo y contraseña.");
             return;
         }
@@ -35,13 +37,22 @@ export default function Login() {
             setSuccessMsg(null);
 
             if (mode === "login") {
-                await signInWithEmail(email, password);
+                await signInWithEmail(cleanEmail, password);
             } else {
-                await signUpWithEmail(email, password);
-                setSuccessMsg("Cuenta creada exitosamente. Si se requiere confirmación, revisa tu correo.");
+                try {
+                    await signUpWithEmail(cleanEmail, password);
+                } catch (signUpErr: any) {
+                    // Si ocurre un error de envío de correo en Supabase (rate limit 429), continuamos registrando en el backend
+                    console.warn("Aviso en registro Supabase:", signUpErr.message);
+                }
+
+                // Registrar la solicitud en el backend de Django Ninja
+                await checkUserPermission(cleanEmail);
+                setSuccessMsg("Tu solicitud de acceso ha sido registrada exitosamente y se encuentra pendiente de aprobación por un administrador.");
+                setEmail("");
+                setPassword("");
             }
         } catch (error: any) {
-            console.error("Error de autenticación:", error);
             setErrorMsg(error.message || "Ocurrió un error al procesar tu solicitud.");
         } finally {
             setSubmitting(false);

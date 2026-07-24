@@ -106,7 +106,7 @@ export default function ClientesPage() {
                         <table className="w-full text-left border-collapse min-w-[700px]">
                             <thead className="bg-surface-container-low font-label-md text-label-md text-on-surface-variant border-b border-outline-variant">
                                 <tr className="text-center">
-                                    <th className="py-3 px-6 font-semibold uppercase tracking-wider text-left border-r border-outline-variant">Nombre Completo</th>
+                                    <th className="py-3 px-6 font-semibold uppercase tracking-wider text-left border-r border-outline-variant sticky left-0 z-20 bg-surface-container-low min-w-[220px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">Nombre Completo</th>
                                     <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Email</th>
                                     <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center border-r border-outline-variant">Teléfono</th>
                                     <th className="py-3 px-6 font-semibold uppercase tracking-wider text-center">Acciones</th>
@@ -116,7 +116,7 @@ export default function ClientesPage() {
                                 {loading ? (
                                     Array(4).fill(null).map((_, i) => (
                                         <tr key={i} className="animate-pulse text-center">
-                                            <td className="py-4 px-6 border-r border-outline-variant text-left"><div className="h-5 bg-outline-variant/30 rounded w-44"></div></td>
+                                            <td className="py-4 px-6 border-r border-outline-variant text-left sticky left-0 z-10 bg-surface-container-lowest shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]"><div className="h-5 bg-outline-variant/30 rounded w-44"></div></td>
                                             <td className="py-4 px-6 border-r border-outline-variant"><div className="h-5 bg-outline-variant/30 rounded w-36 mx-auto"></div></td>
                                             <td className="py-4 px-6 border-r border-outline-variant"><div className="h-5 bg-outline-variant/30 rounded w-28 mx-auto"></div></td>
                                             <td className="py-4 px-6"><div className="h-5 bg-outline-variant/30 rounded w-16 mx-auto"></div></td>
@@ -128,8 +128,8 @@ export default function ClientesPage() {
                                     </tr>
                                 ) : filteredClientes.length > 0 ? (
                                     filteredClientes.map((c) => (
-                                        <tr key={c.id} className="hover:bg-surface-container/40 transition-colors text-center">
-                                            <td className="py-4 px-6 border-r border-outline-variant text-left font-semibold text-primary">{c.nombre_completo}</td>
+                                        <tr key={c.id} className="hover:bg-surface-container/40 transition-colors text-center group">
+                                            <td className="py-4 px-6 border-r border-outline-variant text-left font-semibold text-primary sticky left-0 z-10 bg-surface-container-lowest group-hover:bg-surface-container/60 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">{c.nombre_completo}</td>
                                             <td className="py-4 px-6 border-r border-outline-variant text-on-surface-variant">{c.email || "No registrado"}</td>
                                             <td className="py-4 px-6 border-r border-outline-variant text-on-surface-variant font-mono">{c.telefono || "No registrado"}</td>
                                             <td className="py-4 px-6 whitespace-nowrap">

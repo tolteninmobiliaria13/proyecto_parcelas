@@ -121,7 +121,7 @@ export default function ParcelasTable({
                     </p>
                 </div>
                 <div className="text-sm font-medium text-on-surface-variant bg-surface-container px-3 py-1.5 rounded-full border border-outline-variant">
-                    {displayCount} Registros (Página {page} de {totalPages})
+                    {displayCount} Registros
                 </div>
             </div>
 
@@ -213,7 +213,7 @@ export default function ParcelasTable({
                     )}
                 </span>
                 <div className="flex items-center gap-2">
-                    <button 
+                    <button
                         onClick={() => setPage(Math.max(1, page - 1))}
                         disabled={page === 1}
                         className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
@@ -223,7 +223,7 @@ export default function ParcelasTable({
                     <div className="flex items-center gap-1">
                         <button className="w-8 h-8 flex items-center justify-center rounded-md bg-primary-container text-on-primary-container font-data-tabular text-xs sm:text-sm font-medium cursor-pointer">{page}</button>
                     </div>
-                    <button 
+                    <button
                         onClick={() => setPage(Math.min(totalPages, page + 1))}
                         disabled={page >= totalPages}
                         className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
