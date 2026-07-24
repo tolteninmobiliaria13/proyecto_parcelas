@@ -1,6 +1,7 @@
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 import { monthsList } from '../../data/vencimientos';
 import { VencimientosRow } from './VencimientosRow';
+import { sortParcelasByLote } from '../../utils/loteSort';
 
 const MIN_YEAR = 2024;
 const MAX_YEAR = new Date().getFullYear();
@@ -44,6 +45,7 @@ export const VencimientosTable = ({
 }: VencimientosTableProps) => {
   const months = monthsList;
   const year = Number(selectedYear);
+  const sortedData = sortParcelasByLote(data);
 
   const handlePrev = () => {
     if (year > MIN_YEAR) onYearChange?.(String(year - 1));
@@ -130,7 +132,7 @@ export const VencimientosTable = ({
                   {error}
                 </td>
               </tr>
-            ) : data.length === 0 ? (
+            ) : sortedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={months.length + 2}
@@ -140,7 +142,7 @@ export const VencimientosTable = ({
                 </td>
               </tr>
             ) : (
-              data.map((row) => (
+              sortedData.map((row) => (
                 <VencimientosRow
                   key={row.id}
                   row={row}

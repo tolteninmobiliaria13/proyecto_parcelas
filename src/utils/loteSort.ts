@@ -56,6 +56,10 @@ export function compareLotes(aStr: string, bStr: string): number {
     return a.subStr.localeCompare(b.subStr, undefined, { numeric: true });
 }
 
-export function sortParcelasByLote<T extends { id: string }>(parcelas: T[]): T[] {
-    return [...parcelas].sort((a, b) => compareLotes(a.id, b.id));
+export function sortParcelasByLote<T>(
+    items: T[],
+    getLoteNumber?: (item: T) => string
+): T[] {
+    const getKey = getLoteNumber || ((item: any) => item.lotNumber || item.id || item.numero_lote || "");
+    return [...items].sort((a, b) => compareLotes(getKey(a), getKey(b)));
 }
