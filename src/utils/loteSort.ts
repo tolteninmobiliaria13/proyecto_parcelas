@@ -1,5 +1,3 @@
-import type { Parcela } from "../types/parcela";
-
 export function getLoteSortKey(loteStr: string) {
     if (!loteStr) return { prefix: "", num: 0, hasSub: false, subIsNum: false, subNum: 0, subStr: "" };
     
