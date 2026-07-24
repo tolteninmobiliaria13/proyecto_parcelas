@@ -3,6 +3,7 @@ import useSWR from "swr";
 import type { Parcela } from "../../types/parcela";
 import { getParcelas } from "../../services/api";
 import ParcelaRow, { ParcelaCard } from "./ParcelaRow";
+import { sortParcelasByLote } from "../../utils/loteSort";
 
 type ParcelasTableProps = {
     searchQuery: string;
@@ -94,11 +95,12 @@ export default function ParcelasTable({
     }, [refreshTrigger, mutate]);
 
     const parcelas = data?.items || [];
+    const sortedParcelas = sortParcelasByLote(parcelas);
     const totalCount = data?.total || 0;
     const totalPages = data?.pages || 1;
 
     // Client-side filtering by id (lote) or owner (propietario)
-    const filteredParcelas = parcelas.filter((parcela) => {
+    const filteredParcelas = sortedParcelas.filter((parcela) => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
         return (

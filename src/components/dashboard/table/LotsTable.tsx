@@ -3,6 +3,7 @@ import useSWR from "swr";
 import type { Lot } from "../../../types/lots";
 import { getDashboardLots } from "../../../services/api";
 import LotRow, { LotCard } from "./LotRow";
+import { sortParcelasByLote } from "../../../utils/loteSort";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -173,7 +174,8 @@ export default function LotsTable() {
     );
 
     const counts: Record<TabKey, number> = { morosos: morosos.length, pendientes: pendientes.length };
-    const activeRows = activeTab === "morosos" ? morosos : pendientes;
+    const rawActiveRows = activeTab === "morosos" ? morosos : pendientes;
+    const activeRows = sortParcelasByLote(rawActiveRows);
     const activeTab_ = TABS.find((t) => t.key === activeTab)!;
 
     return (
