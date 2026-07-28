@@ -264,11 +264,50 @@ export const updateParcela = async (
     return response.data;
 };
 
+export interface ParcelaPapelera {
+    id: string;
+    numero_lote: string;
+    subdivision: string;
+    owner: string;
+    precio_base: number;
+    fecha_eliminacion: string | null;
+}
+
 /**
- * Elimina una parcela de la base de datos.
+ * Obtiene la lista de parcelas que están en la papelera.
+ */
+export const getParcelasPapelera = async (): Promise<ParcelaPapelera[]> => {
+    const response = await apiClient.get<ParcelaPapelera[]>('/parcelas/papelera');
+    return response.data;
+};
+
+/**
+ * Mueve una parcela a la papelera (soft-delete).
  */
 export const deleteParcela = async (loteId: string): Promise<void> => {
     await apiClient.delete(`/parcelas/${loteId}`);
+    clearCache('parcelas');
+    clearCache('dashboard');
+    clearCache('vencimientos');
+    clearCache('contrato_detalle');
+};
+
+/**
+ * Restaura una parcela desde la papelera.
+ */
+export const restoreParcela = async (loteId: string): Promise<void> => {
+    await apiClient.put(`/parcelas/${loteId}/restaurar`);
+    clearCache('parcelas');
+    clearCache('dashboard');
+    clearCache('vencimientos');
+    clearCache('contrato_detalle');
+};
+
+/**
+ * Elimina una parcela definitivamente de la base de datos (con sus contratos y cuotas).
+ */
+export const deleteParcelaDefinitivo = async (loteId: string): Promise<void> => {
+    await apiClient.delete(`/parcelas/${loteId}/definitivo`);
     clearCache('parcelas');
     clearCache('dashboard');
     clearCache('vencimientos');
