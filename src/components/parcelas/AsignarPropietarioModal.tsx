@@ -29,6 +29,9 @@ export default function AsignarPropietarioModal({
     const [fechaFirma, setFechaFirma] = useState(
         new Date().toISOString().substring(0, 10) // "YYYY-MM-DD"
     );
+    const [fechaPago, setFechaPago] = useState(
+        new Date().toISOString().substring(0, 10) // "YYYY-MM-DD"
+    );
     const [pieInicial, setPieInicial] = useState("");
     const [totalCuotas, setTotalCuotas] = useState("12");
     const [montoCuota, setMontoCuota] = useState("");
@@ -73,7 +76,8 @@ export default function AsignarPropietarioModal({
                 .then((detail) => {
                     setClienteMode("existing");
                     setSelectedClienteId(detail.cliente_id);
-                    setFechaFirma(detail.fecha_pago);
+                    setFechaFirma(detail.fecha_firma || detail.fecha_pago);
+                    setFechaPago(detail.fecha_pago);
                     setPieInicial(String(detail.pie_inicial));
                     setTotalCuotas(String(detail.total_cuotas));
                     setMontoCuota(String(detail.monto_cuota));
@@ -94,7 +98,9 @@ export default function AsignarPropietarioModal({
             setPieInicial("");
             setTotalCuotas("12");
             setCuotasPagadas("0");
-            setFechaFirma(new Date().toISOString().substring(0, 10));
+            const todayISO = new Date().toISOString().substring(0, 10);
+            setFechaFirma(todayISO);
+            setFechaPago(todayISO);
             setError(null);
         }
     }, [isOpen, parcela, isEditMode]);
@@ -133,6 +139,11 @@ export default function AsignarPropietarioModal({
             setLoadingSubmit(false);
             return;
         }
+        if (!fechaPago) {
+            setError("La fecha asignada de pago es obligatoria.");
+            setLoadingSubmit(false);
+            return;
+        }
         if (Number(pieInicial) < 0) {
             setError("El pie inicial no puede ser negativo.");
             setLoadingSubmit(false);
@@ -160,7 +171,8 @@ export default function AsignarPropietarioModal({
         }
 
         const payload: AsignarPropietarioPayload = {
-            fecha_pago: fechaFirma,
+            fecha_firma: fechaFirma,
+            fecha_pago: fechaPago,
             pie_inicial: Number(pieInicial) || 0,
             total_cuotas: Number(totalCuotas),
             monto_cuota: Number(montoCuota),
@@ -361,14 +373,30 @@ export default function AsignarPropietarioModal({
                             {/* Fecha de Firma */}
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-semibold text-on-surface-variant">
-                                    Fecha de Firma *
+                                    Fecha de Firma de Contrato *
                                 </label>
                                 <input
                                     type="date"
                                     value={fechaFirma}
                                     onChange={(e) => setFechaFirma(e.target.value)}
                                     disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none"
+                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none cursor-pointer"
+                                    required
+                                />
+                            </div>
+
+                            {/* Fecha Asignada de Pago */}
+                            <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-on-surface-variant">
+                                    Fecha Asignada de Pago *
+                                </label>
+                                <input
+                                    type="date"
+                                    value={fechaPago}
+                                    onChange={(e) => setFechaPago(e.target.value)}
+                                    disabled={loadingSubmit}
+                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none cursor-pointer"
+                                    title="Primer vencimiento de cuota"
                                     required
                                 />
                             </div>

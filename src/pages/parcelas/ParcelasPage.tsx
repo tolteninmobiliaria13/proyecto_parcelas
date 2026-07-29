@@ -4,6 +4,7 @@ import ParcelasTable from "../../components/parcelas/ParcelasTable";
 import NuevaParcelaModal from "../../components/parcelas/NuevaParcelaModal";
 import EditarParcelaModal from "../../components/parcelas/EditarParcelaModal";
 import AsignarPropietarioModal from "../../components/parcelas/AsignarPropietarioModal";
+import SubdivisionesModal from "../../components/parcelas/SubdivisionesModal";
 import PapeleraModal from "../../components/parcelas/PapeleraModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { deleteParcela } from "../../services/api";
@@ -12,6 +13,7 @@ import type { Parcela } from "../../types/parcela";
 export default function ParcelasPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubdivisionModalOpen, setIsSubdivisionModalOpen] = useState(false);
     const [isPapeleraOpen, setIsPapeleraOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
@@ -68,6 +70,14 @@ export default function ParcelasPage() {
                                 <span className="material-symbols-outlined text-[18px] text-error">delete_sweep</span>
                                 Papelera
                             </button>
+                            {/* Nuevo Loteo Action */}
+                            <button
+                                onClick={() => setIsSubdivisionModalOpen(true)}
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer whitespace-nowrap"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-primary">format_list_bulleted</span>
+                                Gestionar Loteos
+                            </button>
                             {/* Primary Action (New Parcel) */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
@@ -96,6 +106,13 @@ export default function ParcelasPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
+            {/* Gestión de Loteos / Subdivisiones Modal */}
+            <SubdivisionesModal
+                isOpen={isSubdivisionModalOpen}
+                onClose={() => setIsSubdivisionModalOpen(false)}
+                onChanged={() => setRefreshTrigger((prev) => prev + 1)}
             />
 
             {/* Edit Parcela Modal */}

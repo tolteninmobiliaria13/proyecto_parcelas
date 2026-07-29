@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { crearParcela } from "../../services/api";
+import { useState, useEffect } from "react";
+import { crearParcela, getSubdivisiones } from "../../services/api";
+import type { Subdivision } from "../../services/api";
 
 type NuevaParcelaModalProps = {
     isOpen: boolean;
@@ -17,8 +18,24 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
         estado: "disponible",
     });
 
+    const [subdivisionesList, setSubdivisionesList] = useState<Subdivision[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            getSubdivisiones()
+                .then((data) => {
+                    setSubdivisionesList(data);
+                    if (data.length > 0 && !formData.subdivision) {
+                        setFormData((prev) => ({ ...prev, subdivision: data[0].nombre }));
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error al obtener subdivisiones:", err);
+                });
+        }
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -107,7 +124,7 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                             Nueva Parcela
                         </h3>
                         <p className="text-[12px] text-on-surface-variant">
-                            Ingresa los datos para registrar un nuevo lote.
+                            Registra un nuevo lote en el inventario.
                         </p>
                     </div>
                     <button
@@ -152,16 +169,33 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                             <label className="text-xs font-semibold text-on-surface-variant">
                                 Subdivisión / Proyecto *
                             </label>
-                            <input
-                                type="text"
-                                name="subdivision"
-                                placeholder="Ej: Toltén Fases 1"
-                                value={formData.subdivision}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                                required
-                            />
+                            {subdivisionesList.length > 0 ? (
+                                <select
+                                    name="subdivision"
+                                    value={formData.subdivision}
+                                    onChange={handleChange}
+                                    disabled={loading}
+                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow cursor-pointer"
+                                    required
+                                >
+                                    {subdivisionesList.map((sub) => (
+                                        <option key={sub.id} value={sub.nombre}>
+                                            {sub.numero ? `Loteo N° ${sub.numero} - ${sub.nombre}` : sub.nombre}
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <input
+                                    type="text"
+                                    name="subdivision"
+                                    placeholder="Ej: Toltén Fases 1"
+                                    value={formData.subdivision}
+                                    onChange={handleChange}
+                                    disabled={loading}
+                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
+                                    required
+                                />
+                            )}
                         </div>
 
                         {/* ROL */}
