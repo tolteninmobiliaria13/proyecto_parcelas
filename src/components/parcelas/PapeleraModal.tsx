@@ -195,6 +195,20 @@ export default function PapeleraModal({ isOpen, onClose, onChanged }: PapeleraMo
                     </button>
                 </div>
             </div>
+
+            {/* Confirmación para Eliminar Definitivamente */}
+            {itemToDeleteForever && (
+                <ConfirmModal
+                    isOpen={Boolean(itemToDeleteForever)}
+                    title="Eliminar Definitivamente"
+                    message={`¿Estás seguro de eliminar PERMANENTEMENTE la parcela "${itemToDeleteForever.numero_lote}"? Esta acción eliminará el contrato y todos los datos asociados sin posibilidad de recuperación.`}
+                    confirmText="Eliminar Permanentemente"
+                    cancelText="Cancelar"
+                    isDanger={true}
+                    onCancel={() => setItemToDeleteForever(null)}
+                    onConfirm={confirmDeleteForever}
+                />
+            )}
         </div>
     );
 }
