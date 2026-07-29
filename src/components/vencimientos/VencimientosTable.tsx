@@ -1,10 +1,10 @@
+import { useState, useEffect } from 'react';
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 import { monthsList } from '../../data/vencimientos';
 import { VencimientosRow } from './VencimientosRow';
 import { sortParcelasByLote } from '../../utils/loteSort';
 
-const MIN_YEAR = 2024;
-const MAX_YEAR = new Date().getFullYear();
+const ITEMS_PER_PAGE = 10;
 
 interface VencimientosTableProps {
   data: LotPaymentMatrix[];
@@ -38,22 +38,20 @@ function VencimientosRowSkeleton({ monthsCount }: { monthsCount: number }) {
 export const VencimientosTable = ({
   data,
   selectedYear = String(new Date().getFullYear()),
-  onYearChange,
   onCellClick,
   loading = false,
   error = null,
 }: VencimientosTableProps) => {
+  const [page, setPage] = useState(1);
   const months = monthsList;
-  const year = Number(selectedYear);
   const sortedData = sortParcelasByLote(data);
 
-  const handlePrev = () => {
-    if (year > MIN_YEAR) onYearChange?.(String(year - 1));
-  };
+  useEffect(() => {
+    setPage(1);
+  }, [data, selectedYear]);
 
-  const handleNext = () => {
-    if (year < MAX_YEAR) onYearChange?.(String(year + 1));
-  };
+  const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = sortedData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
 
   return (
     <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-xs overflow-hidden flex flex-col">
@@ -142,7 +140,7 @@ export const VencimientosTable = ({
                 </td>
               </tr>
             ) : (
-              sortedData.map((row) => (
+              paginatedData.map((row) => (
                 <VencimientosRow
                   key={row.id}
                   row={row}
@@ -154,30 +152,38 @@ export const VencimientosTable = ({
         </table>
       </div>
 
-      {/* Year Navigation Footer */}
-      <div className="p-3 sm:p-md bg-surface-container-low border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-2 text-[12px] text-on-surface-variant">
+      {/* Pagination Footer */}
+      <div className="p-3 sm:p-md bg-surface-container-low border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-on-surface-variant">
         <span>
-          Mostrando {data.length} lotes — Año {selectedYear}
+          {sortedData.length === 0
+            ? "0 parcelas"
+            : `Mostrando ${(page - 1) * ITEMS_PER_PAGE + 1} a ${Math.min(page * ITEMS_PER_PAGE, sortedData.length)} de ${sortedData.length} parcelas — Año ${selectedYear}`}
         </span>
-        <div className="flex items-center gap-sm">
-          <button
-            onClick={handlePrev}
-            disabled={year <= MIN_YEAR}
-            className="px-md py-1 border border-outline-variant rounded-lg text-[12px] hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Anterior
-          </button>
-          <span className="px-md py-1 bg-primary text-on-primary rounded-lg text-[12px] font-bold select-none">
-            {selectedYear}
-          </span>
-          <button
-            onClick={handleNext}
-            disabled={year >= MAX_YEAR}
-            className="px-md py-1 border border-outline-variant rounded-lg text-[12px] hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Siguiente
-          </button>
-        </div>
+
+        {/* Arrow Navigation */}
+        {sortedData.length > 0 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              title="Página anterior"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <span className="px-3 py-1 rounded-md bg-primary-container text-on-primary-container text-xs font-medium font-data-tabular">
+              Página {page} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page >= totalPages}
+              className="p-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              title="Página siguiente"
+            >
+              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

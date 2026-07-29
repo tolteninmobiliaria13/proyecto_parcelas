@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { updateParcela } from "../../services/api";
+import { updateParcela, getSubdivisiones } from "../../services/api";
 import type { Parcela } from "../../types/parcela";
+import type { Subdivision } from "../../services/api";
 
 type EditarParcelaModalProps = {
     isOpen: boolean;
@@ -24,8 +25,21 @@ export default function EditarParcelaModal({
         estado: "disponible",
     });
 
+    const [subdivisionesList, setSubdivisionesList] = useState<Subdivision[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            getSubdivisiones()
+                .then((data) => {
+                    setSubdivisionesList(data);
+                })
+                .catch((err) => {
+                    console.error("Error al obtener subdivisiones:", err);
+                });
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         if (isOpen && parcela) {
@@ -158,15 +172,35 @@ export default function EditarParcelaModal({
 
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-on-surface-variant">Subdivisión / Proyecto *</label>
-                        <input
-                            type="text"
-                            name="subdivision"
-                            value={formData.subdivision}
-                            onChange={handleChange}
-                            disabled={loading}
-                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                            required
-                        />
+                        {subdivisionesList.length > 0 ? (
+                            <select
+                                name="subdivision"
+                                value={formData.subdivision}
+                                onChange={handleChange}
+                                disabled={loading}
+                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs cursor-pointer"
+                                required
+                            >
+                                {subdivisionesList.map((sub) => (
+                                    <option key={sub.id} value={sub.nombre}>
+                                        {sub.numero ? `Loteo N° ${sub.numero} - ${sub.nombre}` : sub.nombre}
+                                    </option>
+                                ))}
+                                {formData.subdivision && !subdivisionesList.some(s => s.nombre === formData.subdivision) && (
+                                    <option value={formData.subdivision}>{formData.subdivision}</option>
+                                )}
+                            </select>
+                        ) : (
+                            <input
+                                type="text"
+                                name="subdivision"
+                                value={formData.subdivision}
+                                onChange={handleChange}
+                                disabled={loading}
+                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                                required
+                            />
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">

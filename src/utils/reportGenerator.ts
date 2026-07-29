@@ -11,10 +11,8 @@ export const downloadReportDocx = (data: ReporteData) => {
 
             <!-- Información de Encabezado -->
             <div style="margin-bottom: 32px; line-height: 1.6;">
-                <p style="margin: 0;"><span style="font-weight: bold;">Proyecto:</span> ${data.proyecto_nombre}</p>
                 <p style="margin: 0;"><span style="font-weight: bold;">Período:</span> ${data.periodo}</p>
                 <p style="margin: 0;"><span style="font-weight: bold;">Fecha de emisión:</span> ${data.fecha_emision}</p>
-                <p style="margin: 0;"><span style="font-weight: bold;">Moneda:</span> CLP</p>
             </div>
 
             <!-- Sección: Resumen Ejecutivo -->
@@ -75,42 +73,15 @@ export const downloadReportDocx = (data: ReporteData) => {
                     </tbody>
                 </table>
             </div>
-
-            <!-- Sección: Detalle de Cartera -->
-            <div>
-                <h2 style="color: #2f5597; font-weight: bold; font-size: 18px; margin-bottom: 8px; margin-top: 0;">Detalle de Cartera</h2>
-                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid black; text-align: center; font-size: 14px; box-sizing: border-box;">
-                    <tbody>
-                        <tr>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 16.66%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Lote</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 20%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Propietario</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 15%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Estado</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 16.66%; background-color: #f9fafb; font-weight: bold; text-align: right; box-sizing: border-box;">Saldo</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 15%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Próx. Venc.</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; width: 16.66%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Último Pago</td>
-                        </tr>
-                        ${data.detalles.map(item => `
-                        <tr>
-                            <td style="border: 1px solid black; padding: 4px 8px; word-break: break-word; box-sizing: border-box;">${item.numero_lote}</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; word-break: break-word; box-sizing: border-box;">${item.propietario}</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; word-break: break-word; box-sizing: border-box;">${item.estado}</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; text-align: right; word-break: break-word; box-sizing: border-box;">${item.saldo_fmt}</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; word-break: break-word; box-sizing: border-box;">${item.proximo_vencimiento}</td>
-                            <td style="border: 1px solid black; padding: 4px 8px; word-break: break-word; box-sizing: border-box;">${item.ultimo_pago}</td>
-                        </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
         </div>
     `;
 
     const opt = {
-        margin:       10, // mm
-        filename:     `Estado_Cuenta_${data.fecha_emision.replace(/-/g, '_')}.pdf`,
-        image:        { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+        margin: 10, // mm
+        filename: `Estado_Cuenta_${data.fecha_emision.replace(/-/g, '_')}.pdf`,
+        image: { type: 'jpeg' as const, quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     };
 
     // Al pasar el string de HTML directo, html2pdf creará su propio contenedor aislado,

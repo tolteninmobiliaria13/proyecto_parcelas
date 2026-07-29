@@ -80,7 +80,7 @@ export default function ParcelasTable({
     onDeleteParcela,
 }: ParcelasTableProps) {
     const [page, setPage] = useState(1);
-    const limit = 20;
+    const limit = 10;
 
     const { data, error, isLoading, mutate } = useSWR(
         ['parcelas', page, limit],

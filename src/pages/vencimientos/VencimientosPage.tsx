@@ -78,7 +78,7 @@ export const VencimientosPage = () => {
             await actualizarPago(selectedCell.payment.id || '', {
                 monto_cobrar: editAmount,
                 fecha_vencimiento: editDueDate || undefined,
-                fecha_pago_real: editStatus === "paid" || editStatus === "pagado" ? (editPaidDate || new Date().toISOString().substring(0, 10)) : null,
+                fecha_pago_real: editStatus === "paid" || editStatus === "pagado" ? (editPaidDate || editDueDate || undefined) : null,
                 estado: STATUS_MAP[editStatus] || editStatus,
             });
             const data = await getVencimientos(Number(selectedYear));

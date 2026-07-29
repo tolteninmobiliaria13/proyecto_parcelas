@@ -6,6 +6,7 @@ import LotStatus from "./LotStatus";
 
 type LotRowProps = {
     lot: Lot;
+    activeTab?: "morosos" | "pendientes";
 };
 
 function getInitials(name: string) {
@@ -18,89 +19,78 @@ function getInitials(name: string) {
 
 function RowActionsMenu() {
     const [isOpen, setIsOpen] = useState(false);
-    const navigate = useNavigate();
+    const menuRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const [coords, setCoords] = useState({ top: 0, left: 0 });
+    const [coords, setCoords] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+    const navigate = useNavigate();
 
     const handleToggle = (e: React.MouseEvent) => {
         e.stopPropagation();
-        if (buttonRef.current) {
+        if (!isOpen && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect();
             setCoords({
                 top: rect.bottom + window.scrollY,
-                left: rect.right - 176 + window.scrollX,
+                left: rect.right + window.scrollX - 160, // 160px width
             });
         }
         setIsOpen(!isOpen);
     };
 
     useEffect(() => {
-        const updateCoords = () => {
-            if (isOpen && buttonRef.current) {
-                const rect = buttonRef.current.getBoundingClientRect();
-                setCoords({
-                    top: rect.bottom + window.scrollY,
-                    left: rect.right - 176 + window.scrollX,
-                });
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                menuRef.current &&
+                !menuRef.current.contains(e.target as Node) &&
+                buttonRef.current &&
+                !buttonRef.current.contains(e.target as Node)
+            ) {
+                setIsOpen(false);
             }
         };
 
-        if (isOpen) {
-            window.addEventListener("scroll", updateCoords, true);
-            window.addEventListener("resize", updateCoords);
-        }
+        const handleScroll = () => {
+            if (isOpen) setIsOpen(false);
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        window.addEventListener("scroll", handleScroll, true);
+
         return () => {
-            window.removeEventListener("scroll", updateCoords, true);
-            window.removeEventListener("resize", updateCoords);
+            document.removeEventListener("mousedown", handleClickOutside);
+            window.removeEventListener("scroll", handleScroll, true);
         };
     }, [isOpen]);
 
     return (
-        <div className="relative">
+        <div className="relative inline-block text-left">
             <button
                 ref={buttonRef}
                 onClick={handleToggle}
-                className="text-on-surface-variant hover:text-primary transition-colors opacity-70 hover:opacity-100 cursor-pointer p-1 rounded-md hover:bg-surface-container flex items-center justify-center"
-                aria-label="Opciones de lote"
+                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
             >
-                <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                <span className="material-symbols-outlined text-[18px]">more_vert</span>
             </button>
 
             {isOpen && createPortal(
                 <>
-                    {/* Backdrop para cerrar al hacer clic fuera */}
                     <div
+                        className="fixed inset-0 z-40"
                         onClick={() => setIsOpen(false)}
-                        className="fixed inset-0 z-[100]"
                     />
-
                     <div
-                        style={{
-                            position: "absolute",
-                            top: `${coords.top}px`,
-                            left: `${coords.left}px`,
-                        }}
-                        className="w-44 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-[101] text-left font-body-md animate-fade-in"
+                        ref={menuRef}
+                        style={{ top: coords.top, left: coords.left }}
+                        className="absolute z-50 w-40 rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl py-1 text-xs text-on-surface font-medium animate-fade-in"
                     >
-                        <button
-                            onClick={() => {
-                                setIsOpen(false);
-                                navigate("/parcelas");
-                            }}
-                            className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium"
-                        >
-                            <span className="material-symbols-outlined text-[18px] text-primary">visibility</span>
-                            <span>Ver más datos</span>
-                        </button>
                         <button
                             onClick={() => {
                                 setIsOpen(false);
                                 navigate("/vencimientos");
                             }}
-                            className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
+                            className="w-full px-3 py-2 text-left hover:bg-surface-container-low transition-colors flex items-center gap-2 cursor-pointer"
                         >
-                            <span className="material-symbols-outlined text-[18px] text-primary">payments</span>
-                            <span>Ver pagos</span>
+                            <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
+                            Ir a Vencimientos
                         </button>
                     </div>
                 </>,
@@ -110,9 +100,17 @@ function RowActionsMenu() {
     );
 }
 
-export function LotCard({ lot }: LotRowProps) {
+export function LotCard({ lot, activeTab = "morosos" }: LotRowProps) {
     const isOverdue = lot.status === "overdue";
     const initials = getInitials(lot.owner);
+
+    const displayAmount = activeTab === "pendientes"
+        ? lot.installmentValue
+        : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance);
+
+    const amountLabel = activeTab === "pendientes"
+        ? "Valor Cuota"
+        : (isOverdue ? "Deuda Vencida" : "Saldo");
 
     return (
         <div className={`p-4 flex flex-col gap-3 transition-colors ${isOverdue ? "bg-error-container/10" : "bg-surface-container-lowest"}`}>
@@ -133,9 +131,9 @@ export function LotCard({ lot }: LotRowProps) {
 
             <div className="grid grid-cols-2 gap-2 text-xs bg-surface-container-low/60 p-2.5 rounded-lg border border-outline-variant/30">
                 <div>
-                    <span className="text-on-surface-variant block text-[11px]">Saldo</span>
-                    <span className="font-semibold text-on-surface text-sm">
-                        $ {lot.balance.toLocaleString("es-CL", {
+                    <span className="text-on-surface-variant block text-[11px]">{amountLabel}</span>
+                    <span className={`font-semibold text-sm ${isOverdue && activeTab === "morosos" ? "text-error" : "text-on-surface"}`}>
+                        $ {displayAmount.toLocaleString("es-CL", {
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 0,
                         })}
@@ -147,14 +145,26 @@ export function LotCard({ lot }: LotRowProps) {
                         {lot.nextDueDate}
                     </span>
                 </div>
+                {activeTab === "morosos" && isOverdue && (
+                    <div className="col-span-2 pt-1 border-t border-outline-variant/20 flex justify-between items-center">
+                        <span className="text-on-surface-variant text-[11px]">Cuotas Atrasadas:</span>
+                        <span className="font-semibold text-error text-xs">
+                            {lot.overdueCount || 1} {(lot.overdueCount || 1) === 1 ? "cuota" : "cuotas"}
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     );
 }
 
-export default function LotRow({ lot }: LotRowProps) {
+export default function LotRow({ lot, activeTab = "morosos" }: LotRowProps) {
     const isOverdue = lot.status === "overdue";
     const initials = getInitials(lot.owner);
+
+    const displayAmount = activeTab === "pendientes"
+        ? lot.installmentValue
+        : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance);
 
     return (
         <tr className={`hover:bg-surface-container/60 transition-colors group text-center ${isOverdue ? "bg-error-container/5" : ""}`}>
@@ -169,12 +179,23 @@ export default function LotRow({ lot }: LotRowProps) {
                     <span className="font-medium text-on-surface">{lot.owner}</span>
                 </div>
             </td>
-            <td className="py-4 px-6 text-center whitespace-nowrap font-medium text-on-surface border-r border-outline-variant">
-                $ {lot.balance.toLocaleString("es-CL", {
+            <td className={`py-4 px-6 text-center whitespace-nowrap font-medium border-r border-outline-variant ${isOverdue && activeTab === "morosos" ? "text-error font-semibold" : "text-on-surface"}`}>
+                $ {displayAmount.toLocaleString("es-CL", {
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 0,
                 })}
             </td>
+            {activeTab === "morosos" && (
+                <td className="py-4 px-6 text-center whitespace-nowrap border-r border-outline-variant">
+                    {lot.overdueCount && lot.overdueCount > 0 ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-error/10 text-error border border-error/20">
+                            {lot.overdueCount} {lot.overdueCount === 1 ? "cuota" : "cuotas"}
+                        </span>
+                    ) : (
+                        <span className="text-on-surface-variant text-xs font-medium">Al día</span>
+                    )}
+                </td>
+            )}
             <td className={`py-4 px-6 text-center whitespace-nowrap border-r border-outline-variant ${isOverdue ? "text-error font-semibold" : "text-on-surface-variant"}`}>
                 {lot.nextDueDate}
             </td>

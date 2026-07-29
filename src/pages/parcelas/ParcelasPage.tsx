@@ -4,26 +4,32 @@ import ParcelasTable from "../../components/parcelas/ParcelasTable";
 import NuevaParcelaModal from "../../components/parcelas/NuevaParcelaModal";
 import EditarParcelaModal from "../../components/parcelas/EditarParcelaModal";
 import AsignarPropietarioModal from "../../components/parcelas/AsignarPropietarioModal";
+import SubdivisionesModal from "../../components/parcelas/SubdivisionesModal";
+import PapeleraModal from "../../components/parcelas/PapeleraModal";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 import { deleteParcela } from "../../services/api";
 import type { Parcela } from "../../types/parcela";
 
 export default function ParcelasPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSubdivisionModalOpen, setIsSubdivisionModalOpen] = useState(false);
+    const [isPapeleraOpen, setIsPapeleraOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
     const [parcelaToEdit, setParcelaToEdit] = useState<Parcela | null>(null);
+    const [parcelaToMoveToPapelera, setParcelaToMoveToPapelera] = useState<Parcela | null>(null);
 
-    const handleDeleteParcela = async (p: Parcela) => {
-        const confirm = window.confirm(`¿Estás seguro de que deseas eliminar la parcela "${p.id}"? Esta acción borrará la parcela permanentemente.`);
-        if (!confirm) return;
+    const confirmMoveToPapelera = async () => {
+        if (!parcelaToMoveToPapelera) return;
+        const target = parcelaToMoveToPapelera;
+        setParcelaToMoveToPapelera(null);
 
         try {
-            await deleteParcela(p.id);
+            await deleteParcela(target.id);
             setRefreshTrigger((prev) => prev + 1);
         } catch (err: any) {
-            console.error("Error al eliminar parcela:", err);
-            alert(err.response?.data?.message || "No se puede eliminar la parcela. Podría tener contratos o pagos asociados vigentes.");
+            console.error("Error al mover parcela a la papelera:", err);
         }
     };
 
@@ -55,10 +61,22 @@ export default function ParcelasPage() {
                         </div>
                         {/* Action buttons row */}
                         <div className="flex items-center gap-2 w-full sm:w-auto">
-                            {/* Filter Dropdown (Visual only) */}
-                            <button className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer">
-                                <span className="material-symbols-outlined text-[18px]">filter_list</span>
-                                Filtros
+                            {/* Papelera Action */}
+                            <button
+                                onClick={() => setIsPapeleraOpen(true)}
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer"
+                                title="Ver parcelas en la papelera"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-error">delete_sweep</span>
+                                Papelera
+                            </button>
+                            {/* Nuevo Loteo Action */}
+                            <button
+                                onClick={() => setIsSubdivisionModalOpen(true)}
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer whitespace-nowrap"
+                            >
+                                <span className="material-symbols-outlined text-[18px] text-primary">format_list_bulleted</span>
+                                Gestionar Loteos
                             </button>
                             {/* Primary Action (New Parcel) */}
                             <button
@@ -79,7 +97,7 @@ export default function ParcelasPage() {
                     onAssignOwner={(p) => setSelectedParcela(p)}
                     onEditParcela={(p) => setParcelaToEdit(p)}
                     onEditContrato={(p) => setSelectedParcela(p)}
-                    onDeleteParcela={handleDeleteParcela}
+                    onDeleteParcela={(p) => setParcelaToMoveToPapelera(p)}
                 />
             </div>
 
@@ -90,6 +108,13 @@ export default function ParcelasPage() {
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
             />
 
+            {/* Gestión de Loteos / Subdivisiones Modal */}
+            <SubdivisionesModal
+                isOpen={isSubdivisionModalOpen}
+                onClose={() => setIsSubdivisionModalOpen(false)}
+                onChanged={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
             {/* Edit Parcela Modal */}
             <EditarParcelaModal
                 isOpen={parcelaToEdit !== null}
@@ -98,12 +123,36 @@ export default function ParcelasPage() {
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
             />
 
-            {/* Assignment Modal */}
-            <AsignarPropietarioModal
-                isOpen={selectedParcela !== null}
-                parcela={selectedParcela}
-                onClose={() => setSelectedParcela(null)}
-                onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            {/* Asignar / Editar Propietario y Contrato Modal */}
+            {selectedParcela && (
+                <AsignarPropietarioModal
+                    isOpen={Boolean(selectedParcela)}
+                    parcela={selectedParcela}
+                    onClose={() => setSelectedParcela(null)}
+                    onSuccess={() => {
+                        setSelectedParcela(null);
+                        setRefreshTrigger((prev) => prev + 1);
+                    }}
+                />
+            )}
+
+            {/* Papelera Modal */}
+            <PapeleraModal
+                isOpen={isPapeleraOpen}
+                onClose={() => setIsPapeleraOpen(false)}
+                onChanged={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
+            {/* Confirmación para Mover a Papelera */}
+            <ConfirmModal
+                isOpen={parcelaToMoveToPapelera !== null}
+                title="Mover a la Papelera"
+                message={`¿Deseas mover la parcela "${parcelaToMoveToPapelera?.id}" a la Papelera? Podrás restaurarla o eliminarla definitivamente más tarde desde la Papelera.`}
+                confirmText="Mover a Papelera"
+                cancelText="Cancelar"
+                isDanger={true}
+                onCancel={() => setParcelaToMoveToPapelera(null)}
+                onConfirm={confirmMoveToPapelera}
             />
         </DashboardLayout>
     );

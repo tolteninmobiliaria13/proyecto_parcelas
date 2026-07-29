@@ -187,12 +187,65 @@ export interface AsignarPropietarioPayload {
     cliente_nombre?: string | null;
     cliente_email?: string | null;
     cliente_telefono?: string | null;
-    fecha_pago: string; // "YYYY-MM-DD"
+    fecha_pago: string; // "YYYY-MM-DD" (Primer vencimiento)
+    fecha_firma?: string; // "YYYY-MM-DD" (Firma de contrato)
     pie_inicial: number;
     total_cuotas: number;
     monto_cuota: number;
     cuotas_pagadas?: number;
 }
+
+export interface Subdivision {
+    id: string;
+    numero?: number | null;
+    nombre: string;
+}
+
+/**
+ * Obtiene el listado de todas las subdivisiones / loteos.
+ */
+export const getSubdivisiones = async (): Promise<Subdivision[]> => {
+    const cacheKey = 'subdivisiones';
+    if (memoryCache[cacheKey]) {
+        return memoryCache[cacheKey];
+    }
+    const response = await apiClient.get<Subdivision[]>('/subdivisiones');
+    memoryCache[cacheKey] = response.data;
+    return response.data;
+};
+
+/**
+ * Crea una nueva subdivisión / loteo (el número se autoincrementa).
+ */
+export const createSubdivision = async (data: {
+    nombre: string;
+}): Promise<Subdivision> => {
+    const response = await apiClient.post<Subdivision>('/subdivisiones', data);
+    clearCache('subdivisiones');
+    return response.data;
+};
+
+/**
+ * Actualiza el nombre de una subdivisión / loteo.
+ */
+export const updateSubdivision = async (
+    id: string,
+    data: { nombre: string }
+): Promise<Subdivision> => {
+    const response = await apiClient.put<Subdivision>(`/subdivisiones/${id}`, data);
+    clearCache('subdivisiones');
+    clearCache('parcelas');
+    return response.data;
+};
+
+/**
+ * Elimina una subdivisión / loteo.
+ */
+export const deleteSubdivision = async (id: string): Promise<void> => {
+    await apiClient.delete(`/subdivisiones/${id}`);
+    clearCache('subdivisiones');
+    clearCache('parcelas');
+};
 
 /**
  * Obtiene el listado de todos los clientes.
@@ -264,11 +317,50 @@ export const updateParcela = async (
     return response.data;
 };
 
+export interface ParcelaPapelera {
+    id: string;
+    numero_lote: string;
+    subdivision: string;
+    owner: string;
+    precio_base: number;
+    fecha_eliminacion: string | null;
+}
+
 /**
- * Elimina una parcela de la base de datos.
+ * Obtiene la lista de parcelas que están en la papelera.
+ */
+export const getParcelasPapelera = async (): Promise<ParcelaPapelera[]> => {
+    const response = await apiClient.get<ParcelaPapelera[]>('/parcelas/papelera');
+    return response.data;
+};
+
+/**
+ * Mueve una parcela a la papelera (soft-delete).
  */
 export const deleteParcela = async (loteId: string): Promise<void> => {
     await apiClient.delete(`/parcelas/${loteId}`);
+    clearCache('parcelas');
+    clearCache('dashboard');
+    clearCache('vencimientos');
+    clearCache('contrato_detalle');
+};
+
+/**
+ * Restaura una parcela desde la papelera.
+ */
+export const restoreParcela = async (loteId: string): Promise<void> => {
+    await apiClient.put(`/parcelas/${loteId}/restaurar`);
+    clearCache('parcelas');
+    clearCache('dashboard');
+    clearCache('vencimientos');
+    clearCache('contrato_detalle');
+};
+
+/**
+ * Elimina una parcela definitivamente de la base de datos (con sus contratos y cuotas).
+ */
+export const deleteParcelaDefinitivo = async (loteId: string): Promise<void> => {
+    await apiClient.delete(`/parcelas/${loteId}/definitivo`);
     clearCache('parcelas');
     clearCache('dashboard');
     clearCache('vencimientos');
@@ -339,6 +431,7 @@ export interface ContratoDetalle {
     cliente_id: string;
     cliente_nombre: string;
     fecha_pago: string;
+    fecha_firma?: string;
     pie_inicial: number;
     total_cuotas: number;
     monto_cuota: number;
