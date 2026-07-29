@@ -94,10 +94,13 @@ interface TablePanelProps {
     loading: boolean;
     error: any;
     emptyText: string;
+    activeTab: TabKey;
 }
 
-function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
+function TablePanel({ rows, loading, error, emptyText, activeTab }: TablePanelProps) {
     const skeletons = Array(3).fill(null);
+    const colSpan = activeTab === "morosos" ? 7 : 6;
+
     return (
         <>
             {/* Desktop Table */}
@@ -107,7 +110,12 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
                         <tr className="text-center">
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Lote</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Propietario</th>
-                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Deuda / Cuota</th>
+                            <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">
+                                {activeTab === "morosos" ? "Deuda Total" : "Valor Cuota"}
+                            </th>
+                            {activeTab === "morosos" && (
+                                <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Cuotas Atrasadas</th>
+                            )}
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Vencimiento</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Estado</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Acciones</th>
@@ -118,15 +126,15 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
                             skeletons.map((_, i) => <LotRowSkeleton key={i} />)
                         ) : error ? (
                             <tr>
-                                <td colSpan={6} className="py-8 px-6 text-center text-error font-medium">
+                                <td colSpan={colSpan} className="py-8 px-6 text-center text-error font-medium">
                                     {error.message || "Error al cargar"}
                                 </td>
                             </tr>
                         ) : rows.length > 0 ? (
-                            rows.map((row) => <LotRow key={row.id} lot={row} />)
+                            rows.map((row) => <LotRow key={row.id} lot={row} activeTab={activeTab} />)
                         ) : (
                             <tr>
-                                <td colSpan={6} className="py-8 px-6 text-center text-on-surface-variant/70">
+                                <td colSpan={colSpan} className="py-8 px-6 text-center text-on-surface-variant/70">
                                     {emptyText}
                                 </td>
                             </tr>
@@ -144,7 +152,7 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
                         {error.message || "Error al cargar"}
                     </div>
                 ) : rows.length > 0 ? (
-                    rows.map((row) => <LotCard key={row.id} lot={row} />)
+                    rows.map((row) => <LotCard key={row.id} lot={row} activeTab={activeTab} />)
                 ) : (
                     <div className="py-8 px-4 text-center text-on-surface-variant/70 text-sm">
                         {emptyText}
@@ -157,8 +165,11 @@ function TablePanel({ rows, loading, error, emptyText }: TablePanelProps) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const ITEMS_PER_PAGE = 10;
+
 export default function LotsTable() {
     const [activeTab, setActiveTab] = useState<TabKey>("morosos");
+    const [page, setPage] = useState(1);
 
     const { data, error, isLoading } = useSWR(
         ['dashboard_lots'],
@@ -177,6 +188,14 @@ export default function LotsTable() {
     const rawActiveRows = activeTab === "morosos" ? morosos : pendientes;
     const activeRows = sortParcelasByLote(rawActiveRows, (l) => l.lot);
     const activeTab_ = TABS.find((t) => t.key === activeTab)!;
+
+    const totalPages = Math.ceil(activeRows.length / ITEMS_PER_PAGE) || 1;
+    const paginatedRows = activeRows.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+    const handleTabChange = (key: TabKey) => {
+        setActiveTab(key);
+        setPage(1);
+    };
 
     return (
         <section className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
@@ -201,7 +220,7 @@ export default function LotsTable() {
                         return (
                             <button
                                 key={tab.key}
-                                onClick={() => setActiveTab(tab.key)}
+                                onClick={() => handleTabChange(tab.key)}
                                 className={`relative flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap border-b-2 cursor-pointer ${
                                     isActive
                                         ? "border-primary text-primary"
@@ -233,34 +252,47 @@ export default function LotsTable() {
 
             {/* Content panel */}
             <TablePanel
-                rows={activeRows}
+                rows={paginatedRows}
                 loading={isLoading}
                 error={error}
                 emptyText={activeTab_.emptyText}
+                activeTab={activeTab}
             />
 
             {/* Footer */}
-            <div className="p-4 sm:px-6 sm:py-4 border-t border-outline-variant bg-surface-container-low flex justify-between items-center gap-3 text-xs sm:text-sm font-body-md text-on-surface-variant">
+            <div className="p-4 sm:px-6 sm:py-4 border-t border-outline-variant bg-surface-container-low flex flex-col sm:flex-row justify-between items-center gap-3 text-xs sm:text-sm font-body-md text-on-surface-variant">
                 <span>
                     {isLoading
                         ? "Cargando registros..."
-                        : `Mostrando ${activeRows.length} registros`}
+                        : activeRows.length === 0
+                        ? "0 registros"
+                        : `Mostrando ${(page - 1) * ITEMS_PER_PAGE + 1} a ${Math.min(page * ITEMS_PER_PAGE, activeRows.length)} de ${activeRows.length} registros`}
                 </span>
-                {/* Indicadores de carrusel */}
-                <div className="flex items-center gap-1.5">
-                    {TABS.map((tab) => (
+                
+                {/* Paginación con flechas */}
+                {activeRows.length > 0 && (
+                    <div className="flex items-center gap-2">
                         <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            aria-label={`Ver ${tab.label}`}
-                            className={`rounded-full transition-all duration-200 cursor-pointer ${
-                                activeTab === tab.key
-                                    ? "w-5 h-2 bg-primary"
-                                    : "w-2 h-2 bg-outline-variant hover:bg-outline"
-                            }`}
-                        />
-                    ))}
-                </div>
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page === 1}
+                            className="p-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            title="Página anterior"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </button>
+                        <span className="px-3 py-1 rounded-md bg-primary-container text-on-primary-container text-xs font-medium font-data-tabular">
+                            Página {page} de {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={page >= totalPages}
+                            className="p-1.5 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:text-on-surface disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            title="Página siguiente"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );

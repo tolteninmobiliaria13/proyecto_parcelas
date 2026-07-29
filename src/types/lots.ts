@@ -19,6 +19,10 @@ export interface Lot {
 
     status: "current" | "overdue";
 
+    overdueCount?: number;
+
+    overdueBalance?: number;
+
     lastPaymentDate?: string;
 
     paymentMethod?: string;
