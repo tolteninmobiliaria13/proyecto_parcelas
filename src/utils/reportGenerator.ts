@@ -17,32 +17,44 @@ export const downloadReportDocx = (data: ReporteData) => {
 
             <!-- Sección: Resumen Ejecutivo -->
             <div style="margin-bottom: 32px;">
-                <h2 style="color: #2f5597; font-weight: bold; font-size: 18px; margin-bottom: 8px; margin-top: 0;">Resumen Ejecutivo</h2>
-                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid black; box-sizing: border-box;">
+                <h2 style="color: #2f5597; font-weight: bold; font-size: 18px; margin-bottom: 12px; margin-top: 0;">Resumen Ejecutivo</h2>
+                
+                <!-- Tabla 1: Total Esperado -->
+                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #cbd5e1; box-sizing: border-box; margin-bottom: 16px;">
                     <tbody>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; width: 50%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Indicador</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; width: 50%; background-color: #f9fafb; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; box-sizing: border-box;">Indicador</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Total esperado</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.facturacion_periodo_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: bold; box-sizing: border-box;">Total esperado ${data.periodo}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.facturacion_periodo_fmt}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Tabla 2: Detalle de Cobranza y Cuentas -->
+                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #cbd5e1; box-sizing: border-box;">
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; box-sizing: border-box;">Indicador</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
                         <tr>
-                        <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Pagos Atrasados</td>
-                        <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Pagos Atrasados</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
                         </tr>
                         <tr>
-                        <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Total pagado mes</td>
-                        <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_corriente_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Cuotas ${data.periodo}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_corriente_fmt}</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; font-weight: bold; box-sizing: border-box;">Total Recaudado</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_efectiva_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: bold; box-sizing: border-box;">Total Recaudado</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_efectiva_fmt}</td>
                         </tr>
-                        <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Cuentas por cobrar</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
+                        <tr style="color: #dc2626; font-weight: bold;">
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Cuentas por cobrar</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -50,25 +62,25 @@ export const downloadReportDocx = (data: ReporteData) => {
 
             <!-- Sección: Estado de Cobranza -->
             <div style="margin-bottom: 32px;">
-                <h2 style="color: #2f5597; font-weight: bold; font-size: 18px; margin-bottom: 8px; margin-top: 0;">Estado de Cobranza</h2>
-                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid black; text-align: center; box-sizing: border-box;">
+                <h2 style="color: #2f5597; font-weight: bold; font-size: 18px; margin-bottom: 12px; margin-top: 0;">Estado de Cobranza</h2>
+                <table style="width: 100%; table-layout: fixed; border-collapse: collapse; border: 1px solid #cbd5e1; text-align: center; box-sizing: border-box;">
                     <tbody>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; width: 33.33%; background-color: #f9fafb; font-weight: bold; text-align: left; box-sizing: border-box;">Estado</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; width: 33.33%; background-color: #f9fafb; font-weight: bold; box-sizing: border-box;">Lotes</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; width: 33.33%; background-color: #f9fafb; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 33.33%; background-color: #f8fafc; font-weight: bold; text-align: left; box-sizing: border-box;">Estado</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 33.33%; background-color: #f8fafc; font-weight: bold; box-sizing: border-box;">Lotes</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 33.33%; background-color: #f8fafc; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
                         ${data.estado_cobranza.map(item => `
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: left; box-sizing: border-box;">${item.estado}</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">${item.lotes}</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${item.monto_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: left; box-sizing: border-box;">${item.estado}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">${item.lotes}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${item.monto_fmt}</td>
                         </tr>
                         `).join('')}
-                        <tr style="font-weight: bold; background-color: #f9fafb;">
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: left; box-sizing: border-box;">Total</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">${data.total_estado_cobranza.lotes}</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.total_estado_cobranza.monto_fmt}</td>
+                        <tr style="font-weight: bold; background-color: #f8fafc;">
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: left; box-sizing: border-box;">Total</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">${data.total_estado_cobranza.lotes}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.total_estado_cobranza.monto_fmt}</td>
                         </tr>
                     </tbody>
                 </table>
