@@ -32,6 +32,7 @@ export default function AsignarPropietarioModal({
     const [fechaPago, setFechaPago] = useState(
         new Date().toISOString().substring(0, 10) // "YYYY-MM-DD"
     );
+    const [modalidad, setModalidad] = useState<"credito" | "contado">("credito");
     const [pieInicial, setPieInicial] = useState("");
     const [totalCuotas, setTotalCuotas] = useState("12");
     const [montoCuota, setMontoCuota] = useState("");
@@ -41,6 +42,21 @@ export default function AsignarPropietarioModal({
     const [error, setError] = useState<string | null>(null);
 
     const isEditMode = parcela ? (parcela.status !== "inactive") : false;
+
+    const handleModalidadChange = (newModalidad: "credito" | "contado") => {
+        setModalidad(newModalidad);
+        if (newModalidad === "contado" && parcela) {
+            setPieInicial(String(parcela.precioVenta));
+            setTotalCuotas("0");
+            setMontoCuota("0");
+            setCuotasPagadas("0");
+        } else if (newModalidad === "credito") {
+            setPieInicial("");
+            setTotalCuotas("12");
+            setMontoCuota("");
+            setCuotasPagadas("0");
+        }
+    };
 
     // Fetch clients on mount when modal opens
     useEffect(() => {
@@ -82,6 +98,11 @@ export default function AsignarPropietarioModal({
                     setTotalCuotas(String(detail.total_cuotas));
                     setMontoCuota(String(detail.monto_cuota));
                     setCuotasPagadas(String(detail.cuotas_pagadas));
+                    if (detail.total_cuotas === 0) {
+                        setModalidad("contado");
+                    } else {
+                        setModalidad("credito");
+                    }
                 })
                 .catch((err) => {
                     console.error("Error al obtener detalle del contrato:", err);
@@ -95,6 +116,7 @@ export default function AsignarPropietarioModal({
             setClienteNombre("");
             setClienteEmail("");
             setClienteTelefono("");
+            setModalidad("credito");
             setPieInicial("");
             setTotalCuotas("12");
             setCuotasPagadas("0");
@@ -108,12 +130,18 @@ export default function AsignarPropietarioModal({
     // Auto-calculate suggested installment amount
     useEffect(() => {
         if (parcela) {
-            const pie = Number(pieInicial) || 0;
-            const cuotas = Number(totalCuotas) || 1;
-            const suggestion = Math.max(0, Math.round((parcela.precioVenta - pie) / cuotas));
-            setMontoCuota(String(suggestion));
+            if (modalidad === "contado") {
+                setMontoCuota("0");
+                setTotalCuotas("0");
+                setCuotasPagadas("0");
+            } else {
+                const pie = Number(pieInicial) || 0;
+                const cuotas = Number(totalCuotas) || 1;
+                const suggestion = Math.max(0, Math.round((parcela.precioVenta - pie) / cuotas));
+                setMontoCuota(String(suggestion));
+            }
         }
-    }, [parcela, pieInicial, totalCuotas]);
+    }, [parcela, pieInicial, totalCuotas, modalidad]);
 
 
     if (!isOpen || !parcela) return null;
@@ -149,25 +177,27 @@ export default function AsignarPropietarioModal({
             setLoadingSubmit(false);
             return;
         }
-        if (Number(totalCuotas) <= 0) {
-            setError("La cantidad de cuotas debe ser mayor a 0.");
-            setLoadingSubmit(false);
-            return;
-        }
-        if (Number(montoCuota) <= 0) {
-            setError("El monto de la cuota debe ser mayor a 0.");
-            setLoadingSubmit(false);
-            return;
-        }
-        if (Number(cuotasPagadas) < 0) {
-            setError("Las cuotas pagadas no pueden ser negativas.");
-            setLoadingSubmit(false);
-            return;
-        }
-        if (Number(cuotasPagadas) > Number(totalCuotas)) {
-            setError("Las cuotas pagadas no pueden superar la cantidad total de cuotas.");
-            setLoadingSubmit(false);
-            return;
+        if (modalidad === "credito") {
+            if (Number(totalCuotas) <= 0) {
+                setError("La cantidad de cuotas debe ser mayor a 0.");
+                setLoadingSubmit(false);
+                return;
+            }
+            if (Number(montoCuota) <= 0) {
+                setError("El monto de la cuota debe ser mayor a 0.");
+                setLoadingSubmit(false);
+                return;
+            }
+            if (Number(cuotasPagadas) < 0) {
+                setError("Las cuotas pagadas no pueden ser negativas.");
+                setLoadingSubmit(false);
+                return;
+            }
+            if (Number(cuotasPagadas) > Number(totalCuotas)) {
+                setError("Las cuotas pagadas no pueden superar la cantidad total de cuotas.");
+                setLoadingSubmit(false);
+                return;
+            }
         }
 
         const payload: AsignarPropietarioPayload = {
@@ -237,7 +267,7 @@ export default function AsignarPropietarioModal({
                             {isEditMode ? "Editar Contrato / Dueño" : "Asignar Propietario"}
                         </h3>
                         <p className="text-[12px] text-on-surface-variant">
-                            {isEditMode 
+                            {isEditMode
                                 ? `Modifica las condiciones contractuales del lote: ${parcela.id}`
                                 : `Asocia un contrato de venta al lote: ${parcela.id} (Valor Base: $ ${parcela.precioVenta.toLocaleString("es-CL")})`}
                         </p>
@@ -267,22 +297,20 @@ export default function AsignarPropietarioModal({
                             <button
                                 type="button"
                                 onClick={() => setClienteMode("existing")}
-                                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                                    clienteMode === "existing"
+                                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${clienteMode === "existing"
                                         ? "bg-surface-container-lowest text-primary shadow-xs"
                                         : "text-on-surface-variant hover:text-on-surface"
-                                }`}
+                                    }`}
                             >
                                 Seleccionar Existente
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setClienteMode("new")}
-                                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                                    clienteMode === "new"
+                                className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${clienteMode === "new"
                                         ? "bg-surface-container-lowest text-primary shadow-xs"
                                         : "text-on-surface-variant hover:text-on-surface"
-                                }`}
+                                    }`}
                             >
                                 Crear Nuevo Cliente
                             </button>
@@ -294,7 +322,7 @@ export default function AsignarPropietarioModal({
                         <span className="text-xs font-bold text-primary uppercase tracking-wide">
                             Información del Propietario
                         </span>
-                        
+
                         {clienteMode === "existing" ? (
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-semibold text-on-surface-variant">
@@ -368,7 +396,38 @@ export default function AsignarPropietarioModal({
                         <span className="text-xs font-bold text-primary uppercase tracking-wide">
                             Condiciones del Contrato de Venta
                         </span>
-                        
+
+                        {/* Selector de Modalidad de Venta */}
+                        <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-on-surface-variant">
+                                Modalidad de Venta *
+                            </label>
+                            <div className="flex bg-surface-container-low p-1 rounded-lg border border-outline-variant/40">
+                                <button
+                                    type="button"
+                                    onClick={() => handleModalidadChange("credito")}
+                                    disabled={loadingSubmit}
+                                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${modalidad === "credito"
+                                            ? "bg-surface-container-lowest text-primary shadow-xs"
+                                            : "text-on-surface-variant hover:text-on-surface"
+                                        }`}
+                                >
+                                    Con Cuotas
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleModalidadChange("contado")}
+                                    disabled={loadingSubmit}
+                                    className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer ${modalidad === "contado"
+                                            ? "bg-surface-container-lowest text-primary shadow-xs"
+                                            : "text-on-surface-variant hover:text-on-surface"
+                                        }`}
+                                >
+                                    Al Contado
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             {/* Fecha de Firma */}
                             <div className="flex flex-col gap-1">
@@ -388,7 +447,7 @@ export default function AsignarPropietarioModal({
                             {/* Fecha Asignada de Pago */}
                             <div className="flex flex-col gap-1">
                                 <label className="text-xs font-semibold text-on-surface-variant">
-                                    Fecha Asignada de Pago *
+                                    {modalidad === "contado" ? "Fecha de Pago *" : "Fecha Asignada de Pago *"}
                                 </label>
                                 <input
                                     type="date"
@@ -396,15 +455,15 @@ export default function AsignarPropietarioModal({
                                     onChange={(e) => setFechaPago(e.target.value)}
                                     disabled={loadingSubmit}
                                     className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none cursor-pointer"
-                                    title="Primer vencimiento de cuota"
+                                    title={modalidad === "contado" ? "Fecha del pago al contado" : "Primer vencimiento de cuota"}
                                     required
                                 />
                             </div>
 
-                            {/* Pie Inicial */}
-                            <div className="flex flex-col gap-1">
+                            {/* Pie Inicial / Abono */}
+                            <div className="flex flex-col gap-1 sm:col-span-2">
                                 <label className="text-xs font-semibold text-on-surface-variant">
-                                    Pie Inicial (CLP) *
+                                    {modalidad === "contado" ? "Monto Total Pagado Al Contado (CLP) *" : "Pie Inicial (CLP) *"}
                                 </label>
                                 <input
                                     type="number"
@@ -412,57 +471,61 @@ export default function AsignarPropietarioModal({
                                     value={pieInicial}
                                     onChange={(e) => setPieInicial(e.target.value)}
                                     disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs font-medium"
                                     required
                                 />
                             </div>
 
-                            {/* Total Cuotas */}
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-on-surface-variant">
-                                    Cantidad de Cuotas *
-                                </label>
-                                <input
-                                    type="number"
-                                    value={totalCuotas}
-                                    onChange={(e) => setTotalCuotas(e.target.value)}
-                                    disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                                    required
-                                />
-                            </div>
+                            {modalidad === "credito" && (
+                                <>
+                                    {/* Total Cuotas */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-xs font-semibold text-on-surface-variant">
+                                            Cantidad de Cuotas *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={totalCuotas}
+                                            onChange={(e) => setTotalCuotas(e.target.value)}
+                                            disabled={loadingSubmit}
+                                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Cuotas Pagadas */}
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-on-surface-variant">
-                                    Cuotas Pagadas al momento *
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max={totalCuotas}
-                                    value={cuotasPagadas}
-                                    onChange={(e) => setCuotasPagadas(e.target.value)}
-                                    disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                                    required
-                                />
-                            </div>
+                                    {/* Cuotas Pagadas */}
+                                    <div className="flex flex-col gap-1">
+                                        <label className="text-xs font-semibold text-on-surface-variant">
+                                            Cuotas Pagadas al momento *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max={totalCuotas}
+                                            value={cuotasPagadas}
+                                            onChange={(e) => setCuotasPagadas(e.target.value)}
+                                            disabled={loadingSubmit}
+                                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Valor Cuota */}
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-on-surface-variant">
-                                    Valor Cuota Estimada (CLP) *
-                                </label>
-                                <input
-                                    type="number"
-                                    value={montoCuota}
-                                    onChange={(e) => setMontoCuota(e.target.value)}
-                                    disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                                    required
-                                />
-                            </div>
+                                    {/* Valor Cuota */}
+                                    <div className="flex flex-col gap-1 sm:col-span-2">
+                                        <label className="text-xs font-semibold text-on-surface-variant">
+                                            Valor Cuota Estimada (CLP) *
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={montoCuota}
+                                            onChange={(e) => setMontoCuota(e.target.value)}
+                                            disabled={loadingSubmit}
+                                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                                            required
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* Resumen Financiero */}
@@ -471,19 +534,19 @@ export default function AsignarPropietarioModal({
                                 <div className="flex justify-between">
                                     <span className="text-on-surface-variant">Monto Total Contrato:</span>
                                     <span className="text-on-surface font-semibold">
-                                        $ { (Number(pieInicial) + (Number(totalCuotas) * (Number(montoCuota) || 0))).toLocaleString("es-CL") }
+                                        $ {(Number(pieInicial) + (Number(totalCuotas) * (Number(montoCuota) || 0))).toLocaleString("es-CL")}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-on-surface-variant">Abonado (Pie + Pagos):</span>
                                     <span className="text-emerald-600 font-bold">
-                                        $ { (Number(pieInicial) + (Number(cuotasPagadas) * (Number(montoCuota) || 0))).toLocaleString("es-CL") }
+                                        $ {(Number(pieInicial) + (Number(cuotasPagadas) * (Number(montoCuota) || 0))).toLocaleString("es-CL")}
                                     </span>
                                 </div>
                                 <div className="flex justify-between border-t border-outline-variant/40 pt-1.5 font-bold">
                                     <span className="text-on-surface">Saldo Pendiente:</span>
                                     <span className="text-primary">
-                                        $ { (Math.max(0, (Number(totalCuotas) - Number(cuotasPagadas)) * (Number(montoCuota) || 0))).toLocaleString("es-CL") }
+                                        $ {(Math.max(0, (Number(totalCuotas) - Number(cuotasPagadas)) * (Number(montoCuota) || 0))).toLocaleString("es-CL")}
                                     </span>
                                 </div>
                             </div>

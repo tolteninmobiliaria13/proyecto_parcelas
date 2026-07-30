@@ -25,24 +25,24 @@ export const downloadReportDocx = (data: ReporteData) => {
                             <td style="border: 1px solid black; padding: 4px 12px; width: 50%; background-color: #f9fafb; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Facturación del período</td>
+                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Total esperado</td>
                             <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.facturacion_periodo_fmt}</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Cobranza efectiva</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_efectiva_fmt}</td>
+                        <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Pagos Atrasados</td>
+                        <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Recuperación de mora</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
+                        <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Total pagado mes</td>
+                        <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_corriente_fmt}</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Cobranza corriente</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_corriente_fmt}</td>
+                            <td style="border: 1px solid black; padding: 4px 12px; font-weight: bold; box-sizing: border-box;">Total Recaudado</td>
+                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_efectiva_fmt}</td>
                         </tr>
                         <tr>
-                            <td style="border: 1px solid black; padding: 4px 12px; font-weight: bold; box-sizing: border-box;">Cuentas por cobrar</td>
-                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
+                            <td style="border: 1px solid black; padding: 4px 12px; box-sizing: border-box;">Cuentas por cobrar</td>
+                            <td style="border: 1px solid black; padding: 4px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
                         </tr>
                     </tbody>
                 </table>
