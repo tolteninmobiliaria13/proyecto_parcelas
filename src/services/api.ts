@@ -456,6 +456,7 @@ export interface ReporteItem {
     propietario: string;
     estado: string;
     saldo_fmt: string;
+    monto_cuota_fmt?: string;
     proximo_vencimiento: string;
     ultimo_pago: string;
 }
@@ -506,8 +507,12 @@ export const getNotificationsSummary = async (): Promise<NotificationsSummary> =
 /**
  * Obtiene los datos del reporte de pagos del mes presente desde la API REST.
  */
-export const getReporteData = async (): Promise<ReporteData> => {
-    const response = await apiClient.get<ReporteData>('/vencimientos/reporte-data');
+export const getReporteData = async (month?: number, year?: number): Promise<ReporteData> => {
+    const params = new URLSearchParams();
+    if (month) params.append('month', String(month));
+    if (year) params.append('year', String(year));
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await apiClient.get<ReporteData>(`/vencimientos/reporte-data${queryString}`);
     return response.data;
 };
 
