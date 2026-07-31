@@ -178,10 +178,10 @@ export default function LotsTable() {
     );
     const lots = data?.items || [];
 
-    // Clasificación: excluir completamente pagados (sin balance y sin nextDueDate)
-    const morosos = lots.filter((l) => l.status === "overdue");
+    // Clasificación: considerar cuotas vencidas (status === "overdue" o overdueCount > 0)
+    const morosos = lots.filter((l) => l.status === "overdue" || (l.overdueCount && l.overdueCount > 0));
     const pendientes = lots.filter(
-        (l) => l.status === "current" && isThisMonth(l.nextDueDate)
+        (l) => (l.status === "current" || !l.status) && (!l.overdueCount || l.overdueCount === 0) && isThisMonth(l.nextDueDate)
     );
 
     const counts: Record<TabKey, number> = { morosos: morosos.length, pendientes: pendientes.length };

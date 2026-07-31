@@ -41,15 +41,15 @@ export default function AsignarPropietarioModal({
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const isEditMode = parcela ? (parcela.status !== "inactive") : false;
+    const isEditMode = parcela ? (parcela.status !== "inactive" || (Boolean(parcela.owner) && parcela.owner !== "Sin Asignar")) : false;
 
     const handleModalidadChange = (newModalidad: "credito" | "contado") => {
         setModalidad(newModalidad);
         if (newModalidad === "contado" && parcela) {
-            setPieInicial(String(parcela.precioVenta));
-            setTotalCuotas("0");
-            setMontoCuota("0");
-            setCuotasPagadas("0");
+            setPieInicial("0");
+            setTotalCuotas("1");
+            setMontoCuota(String(parcela.precioVenta));
+            setCuotasPagadas("1");
         } else if (newModalidad === "credito") {
             setPieInicial("");
             setTotalCuotas("12");
@@ -98,7 +98,9 @@ export default function AsignarPropietarioModal({
                     setTotalCuotas(String(detail.total_cuotas));
                     setMontoCuota(String(detail.monto_cuota));
                     setCuotasPagadas(String(detail.cuotas_pagadas));
-                    if (detail.total_cuotas === 0) {
+                    if (detail.tipo_pago) {
+                        setModalidad(detail.tipo_pago);
+                    } else if (detail.total_cuotas === 0) {
                         setModalidad("contado");
                     } else {
                         setModalidad("credito");
@@ -131,9 +133,10 @@ export default function AsignarPropietarioModal({
     useEffect(() => {
         if (parcela) {
             if (modalidad === "contado") {
-                setMontoCuota("0");
-                setTotalCuotas("0");
-                setCuotasPagadas("0");
+                const pie = Number(pieInicial) || 0;
+                setTotalCuotas("1");
+                setCuotasPagadas("1");
+                setMontoCuota(String(Math.max(0, parcela.precioVenta - pie)));
             } else {
                 const pie = Number(pieInicial) || 0;
                 const cuotas = Number(totalCuotas) || 1;
@@ -207,6 +210,7 @@ export default function AsignarPropietarioModal({
             total_cuotas: Number(totalCuotas),
             monto_cuota: Number(montoCuota),
             cuotas_pagadas: Number(cuotasPagadas),
+            tipo_pago: modalidad,
         };
 
         if (clienteMode === "existing") {
