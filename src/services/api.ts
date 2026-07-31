@@ -193,6 +193,7 @@ export interface AsignarPropietarioPayload {
     total_cuotas: number;
     monto_cuota: number;
     cuotas_pagadas?: number;
+    tipo_pago?: 'contado' | 'credito';
 }
 
 export interface Subdivision {
@@ -436,6 +437,7 @@ export interface ContratoDetalle {
     total_cuotas: number;
     monto_cuota: number;
     cuotas_pagadas: number;
+    tipo_pago?: 'contado' | 'credito';
 }
 
 /**
@@ -455,10 +457,22 @@ export interface ReporteItem {
     numero_lote: string;
     propietario: string;
     estado: string;
+    estado_cuota_mes?: 'PAGADO_CORRIENTE' | 'PAGADO_ANTICIPADO' | 'VENCIDO_O_IMPAGO_EN_MES' | 'SIN_CUOTA';
+    fecha_pago_cuota_mes?: string;
+    tiene_cuota_mes?: boolean;
+    monto_cuota_mes_fmt?: string;
     saldo_fmt: string;
     monto_cuota_fmt?: string;
     proximo_vencimiento: string;
     ultimo_pago: string;
+}
+
+export interface DesglosePagoItem {
+    lote: string;
+    cliente: string;
+    vencimiento: string;
+    fecha_pago: string;
+    monto_fmt: string;
 }
 
 export interface ReporteData {
@@ -469,6 +483,11 @@ export interface ReporteData {
         facturacion_periodo_fmt: string;
         cobranza_efectiva_fmt: string;
         recuperacion_mora_fmt: string;
+        recuperacion_mora_val?: number;
+        desglose_pagos_atrasados?: DesglosePagoItem[];
+        pagos_adelantados_fmt: string;
+        pagos_adelantados_val?: number;
+        desglose_pagos_adelantados?: DesglosePagoItem[];
         cobranza_corriente_fmt: string;
         cuentas_por_cobrar_fmt: string;
     };

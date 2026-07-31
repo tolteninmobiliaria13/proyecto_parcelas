@@ -3,6 +3,31 @@ import html2pdf from 'html2pdf.js';
 import type { ReporteData } from "../services/api";
 
 export const downloadReportDocx = (data: ReporteData) => {
+    const tienePagosAtrasados = (data.resumen_ejecutivo.recuperacion_mora_val ?? 0) > 0 || (!!data.resumen_ejecutivo.recuperacion_mora_fmt && data.resumen_ejecutivo.recuperacion_mora_fmt !== '$ 0');
+    const tienePagosAdelantados = (data.resumen_ejecutivo.pagos_adelantados_val ?? 0) > 0 || (!!data.resumen_ejecutivo.pagos_adelantados_fmt && data.resumen_ejecutivo.pagos_adelantados_fmt !== '$ 0');
+    const tieneCuentasPorCobrar = !!data.resumen_ejecutivo.cuentas_por_cobrar_fmt && data.resumen_ejecutivo.cuentas_por_cobrar_fmt !== '$ 0';
+
+    const filaPagosAtrasados = tienePagosAtrasados ? `
+        <tr>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Pagos Atrasados</td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
+        </tr>
+    ` : '';
+
+    const filaPagosAdelantados = tienePagosAdelantados ? `
+        <tr>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Pagos Adelantados</td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.pagos_adelantados_fmt}</td>
+        </tr>
+    ` : '';
+
+    const filaCuentasPorCobrar = tieneCuentasPorCobrar ? `
+        <tr style="color: #dc2626; font-weight: bold;">
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Cuentas por cobrar</td>
+            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
+        </tr>
+    ` : '';
+
     // Generate the HTML content string for the PDF with INLINE STYLES to avoid html2canvas oklch crash
     const htmlContent = `
         <div id="pdf-container" style="padding: 30px; background-color: white; font-family: serif; color: black; box-sizing: border-box;">
@@ -40,10 +65,8 @@ export const downloadReportDocx = (data: ReporteData) => {
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; box-sizing: border-box;">Indicador</td>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 50%; background-color: #f8fafc; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
-                        <tr>
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Pagos Atrasados</td>
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.recuperacion_mora_fmt}</td>
-                        </tr>
+                        ${filaPagosAtrasados}
+                        ${filaPagosAdelantados}
                         <tr>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Cuotas ${data.periodo}</td>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_corriente_fmt}</td>
@@ -52,10 +75,7 @@ export const downloadReportDocx = (data: ReporteData) => {
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; font-weight: bold; box-sizing: border-box;">Total Recaudado</td>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; font-weight: bold; box-sizing: border-box;">${data.resumen_ejecutivo.cobranza_efectiva_fmt}</td>
                         </tr>
-                        <tr style="color: #dc2626; font-weight: bold;">
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">Cuentas por cobrar</td>
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
-                        </tr>
+                        ${filaCuentasPorCobrar}
                     </tbody>
                 </table>
             </div>
@@ -70,7 +90,7 @@ export const downloadReportDocx = (data: ReporteData) => {
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 33.33%; background-color: #f8fafc; font-weight: bold; box-sizing: border-box;">Lotes</td>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; width: 33.33%; background-color: #f8fafc; font-weight: bold; text-align: right; box-sizing: border-box;">Monto</td>
                         </tr>
-                        ${data.estado_cobranza.map(item => `
+                        ${data.estado_cobranza.filter(item => item.lotes > 0 && item.estado !== 'Al día').map(item => `
                         <tr>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: left; box-sizing: border-box;">${item.estado}</td>
                             <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">${item.lotes}</td>
@@ -78,9 +98,9 @@ export const downloadReportDocx = (data: ReporteData) => {
                         </tr>
                         `).join('')}
                         <tr style="font-weight: bold; background-color: #f8fafc;">
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: left; box-sizing: border-box;">Total</td>
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">${data.total_estado_cobranza.lotes}</td>
-                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.total_estado_cobranza.monto_fmt}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: left; box-sizing: border-box;">Total Cuentas por Cobrar</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; box-sizing: border-box;">${data.estado_cobranza.filter(item => item.estado !== 'Al día').reduce((acc, item) => acc + item.lotes, 0)}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 6px 12px; text-align: right; box-sizing: border-box;">${data.resumen_ejecutivo.cuentas_por_cobrar_fmt}</td>
                         </tr>
                     </tbody>
                 </table>
