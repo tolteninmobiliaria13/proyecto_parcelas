@@ -96,9 +96,17 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                         )}
                     </button>
 
+                    {/* Backdrop invisible para cerrar al hacer clic afuera */}
+                    {isNotificationsOpen && (
+                        <div
+                            className="fixed inset-0 z-20"
+                            onClick={() => setIsNotificationsOpen(false)}
+                        />
+                    )}
+
                     {/* Popover de Notificaciones */}
                     {isNotificationsOpen && (
-                        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl py-2 z-30 divide-y divide-outline-variant/40 animate-fade-in">
+                        <div className="fixed left-3 right-3 top-16 max-w-md mx-auto sm:absolute sm:top-auto sm:right-0 sm:left-auto sm:mt-2 sm:w-96 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl py-2 z-30 divide-y divide-outline-variant/40 animate-fade-in">
                             <div className="px-4 py-2.5 flex items-center justify-between">
                                 <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
                                     <span className="material-symbols-outlined text-[16px] text-primary">notifications_active</span>
@@ -121,36 +129,65 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                                         <span>No hay alertas ni notificaciones pendientes.</span>
                                     </div>
                                 ) : (
-                                    notifications.items.map((item) => (
-                                        <Link
-                                            key={item.id}
-                                            to={item.link || "#"}
-                                            onClick={() => setIsNotificationsOpen(false)}
-                                            className="p-3 hover:bg-surface-container-low flex items-start gap-3 transition-colors block text-left"
-                                        >
-                                            <div className={`p-2 rounded-full shrink-0 ${
-                                                item.tipo === "usuario_pendiente"
-                                                    ? "bg-amber-500/10 text-amber-600"
-                                                    : "bg-error/10 text-error"
-                                            }`}>
-                                                <span className="material-symbols-outlined text-[18px]">
-                                                    {item.tipo === "usuario_pendiente" ? "person_add" : "event_upcoming"}
-                                                </span>
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-on-surface truncate">{item.titulo}</p>
-                                                <p className="text-[11px] text-on-surface-variant line-clamp-2 mt-0.5">{item.descripcion}</p>
-                                                <span className="text-[10px] text-on-surface-variant/60 mt-1 block">{item.fecha}</span>
-                                            </div>
-                                        </Link>
-                                    ))
+                                    notifications.items.map((item) => {
+                                        const isOverdue = item.tipo === "cuota_vencida";
+                                        const isDueToday = item.tipo === "cuota_hoy";
+                                        const isUserPending = item.tipo === "usuario_pendiente";
+
+                                        let iconName = "event_upcoming";
+                                        let iconStyles = "bg-error/10 text-error";
+                                        let badgeBg = "bg-error/15 text-error";
+                                        let badgeLabel = "Vencimiento";
+
+                                        if (isUserPending) {
+                                            iconName = "person_add";
+                                            iconStyles = "bg-sky-500/10 text-sky-600 border border-sky-500/20";
+                                            badgeBg = "bg-sky-500/15 text-sky-600";
+                                            badgeLabel = "Solicitud";
+                                        } else if (isOverdue) {
+                                            iconName = "warning";
+                                            iconStyles = "bg-error/10 text-error border border-error/20";
+                                            badgeBg = "bg-error/15 text-error font-bold";
+                                            badgeLabel = "Vencida";
+                                        } else if (isDueToday) {
+                                            iconName = "schedule";
+                                            iconStyles = "bg-amber-500/10 text-amber-600 border border-amber-500/20";
+                                            badgeBg = "bg-amber-500/15 text-amber-600 font-bold";
+                                            badgeLabel = "Vence Hoy";
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                to={item.link || "#"}
+                                                onClick={() => setIsNotificationsOpen(false)}
+                                                className="p-3 hover:bg-surface-container-low flex items-start gap-3 transition-colors block text-left"
+                                            >
+                                                <div className={`p-2 rounded-full shrink-0 ${iconStyles}`}>
+                                                    <span className="material-symbols-outlined text-[18px]">
+                                                        {iconName}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <p className="text-xs font-bold text-on-surface truncate">{item.titulo}</p>
+                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] shrink-0 ${badgeBg}`}>
+                                                            {badgeLabel}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-[11px] text-on-surface-variant line-clamp-2 mt-0.5">{item.descripcion}</p>
+                                                    <span className="text-[10px] text-on-surface-variant/60 mt-1 block font-mono">{item.fecha}</span>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })
                                 )}
                             </div>
 
                             {notifications && notifications.items.length > 0 && (
                                 <div className="px-4 py-2 flex justify-between items-center bg-surface-container-low/40">
-                                    <span className="text-[10px] text-on-surface-variant">
-                                        {notifications.total_count} alerta(s) requiere(n) atención
+                                    <span className="text-[10px] text-on-surface-variant font-medium">
+                                        {notifications.total_count} alerta(s) {notifications.overdue_count ? `(${notifications.overdue_count} vencida/s)` : ''}
                                     </span>
                                     <button
                                         onClick={handleIgnoreNotifications}

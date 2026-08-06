@@ -13,7 +13,6 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
         numero_lote: "",
         numero_rol: "",
         subdivision: "",
-        superficie_m2: "",
         precio_base: "",
         estado: "disponible",
     });
@@ -74,7 +73,6 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                 numero_lote: formData.numero_lote.trim(),
                 numero_rol: formData.numero_rol.trim() || null,
                 subdivision: formData.subdivision.trim(),
-                superficie_m2: formData.superficie_m2 ? Number(formData.superficie_m2) : null,
                 precio_base: Number(formData.precio_base),
                 estado: formData.estado,
             });
@@ -85,7 +83,6 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                 numero_lote: "",
                 numero_rol: "",
                 subdivision: "",
-                superficie_m2: "",
                 precio_base: "",
                 estado: "disponible",
             });
@@ -214,21 +211,7 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                             />
                         </div>
 
-                        {/* Superficie */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Superficie (m²)
-                            </label>
-                            <input
-                                type="number"
-                                name="superficie_m2"
-                                placeholder="Ej: 5000"
-                                value={formData.superficie_m2}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                            />
-                        </div>
+
 
                         {/* Precio Base */}
                         <div className="flex flex-col gap-1">

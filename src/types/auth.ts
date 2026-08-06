@@ -32,7 +32,7 @@ export interface UsuarioPermitidoInput {
 
 export interface NotificationItem {
     id: string;
-    tipo: 'usuario_pendiente' | 'cuota_vencimiento';
+    tipo: 'usuario_pendiente' | 'cuota_vencimiento' | 'cuota_vencida' | 'cuota_hoy';
     titulo: string;
     descripcion: string;
     fecha: string;
@@ -43,5 +43,6 @@ export interface NotificationsSummary {
     total_count: number;
     pending_users_count: number;
     due_today_count: number;
+    overdue_count?: number;
     items: NotificationItem[];
 }

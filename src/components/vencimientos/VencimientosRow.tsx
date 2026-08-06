@@ -19,27 +19,27 @@ export const VencimientosRow = ({ row, onCellClick }: VencimientosRowProps) => {
   return (
     <tr className="hover:bg-surface-container/60 transition-colors group cursor-pointer">
       {/* Sticky Lot / Client Column */}
-      <td className="p-md sticky left-0 z-10 bg-surface-container-lowest group-hover:bg-surface-container/60 border-r border-outline-variant shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center justify-between">
-          <span className="font-bold text-primary text-[14px]">{row.lotNumber}</span>
+      <td className="p-2 sm:p-md sticky left-0 z-10 bg-surface-container-lowest group-hover:bg-surface-container/60 border-r border-outline-variant min-w-[130px] max-w-[130px] sm:min-w-[200px] sm:max-w-none shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between gap-1">
+          <span className="font-bold text-primary text-xs sm:text-[14px]">{row.lotNumber}</span>
           {row.project && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium">
+            <span className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-medium truncate max-w-[50px] sm:max-w-none" title={row.project}>
               {row.project}
             </span>
           )}
         </div>
-        <div className="text-[11px] text-on-surface-variant truncate max-w-[180px] mt-0.5">
+        <div className="text-[10px] sm:text-[11px] text-on-surface-variant truncate max-w-[115px] sm:max-w-[180px] mt-0.5" title={row.clientName}>
           {row.clientName}
         </div>
       </td>
 
       {/* Summary / Progress Column */}
-      <td className="p-md text-center border-r border-outline-variant bg-surface-container-lowest/50">
+      <td className="p-1.5 sm:p-md text-center border-r border-outline-variant bg-surface-container-lowest/50 w-[75px] sm:w-[110px] min-w-[75px] sm:min-w-[110px]">
         <div className="flex flex-col items-center gap-1">
-          <span className="px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full text-[10px] font-bold">
+          <span className="px-1.5 sm:px-2 py-0.5 bg-secondary-container text-on-secondary-container rounded-full text-[9px] sm:text-[10px] font-bold">
             {row.paidMonths} / {row.totalMonths}
           </span>
-          <div className="w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
+          <div className="w-10 sm:w-16 bg-surface-container-high h-1.5 rounded-full overflow-hidden">
             <div
               className="bg-primary h-full rounded-full transition-all duration-300"
               style={{ width: `${progressPercent}%` }}

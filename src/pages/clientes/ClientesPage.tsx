@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import DashboardLayout from "../../components/layout/DashboardLayout";
 import NuevoClienteModal from "../../components/clientes/NuevoClienteModal";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 import { getClientes, deleteCliente } from "../../services/api";
 import type { Cliente } from "../../services/api";
 
@@ -8,11 +9,13 @@ export default function ClientesPage() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [deleteErrorMsg, setDeleteErrorMsg] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+    const [clienteToDelete, setClienteToDelete] = useState<Cliente | null>(null);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     useEffect(() => {
@@ -43,16 +46,21 @@ export default function ClientesPage() {
         });
     }, [clientes, searchQuery]);
 
-    const handleDelete = async (c: Cliente) => {
-        const confirm = window.confirm(`¿Estás seguro de que deseas eliminar al cliente "${c.nombre_completo}"?`);
-        if (!confirm) return;
+    const confirmDeleteCliente = async () => {
+        if (!clienteToDelete) return;
+        const target = clienteToDelete;
+        setClienteToDelete(null);
+        setDeleteErrorMsg(null);
 
         try {
-            await deleteCliente(c.id);
+            await deleteCliente(target.id);
             setRefreshTrigger((prev) => prev + 1);
         } catch (err: any) {
             console.error("Error al eliminar cliente:", err);
-            alert(err.response?.data?.message || "No se pudo eliminar al cliente. Podría tener parcelas o contratos vigentes asociados.");
+            setDeleteErrorMsg(
+                err.response?.data?.message ||
+                `No se pudo eliminar a "${target.nombre_completo}". Podría tener parcelas o contratos vigentes asociados.`
+            );
         }
     };
 
@@ -95,6 +103,22 @@ export default function ClientesPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Error Banner en caso de fallo al eliminar */}
+                {deleteErrorMsg && (
+                    <div className="p-4 rounded-xl bg-error/10 border border-error/20 text-error text-xs sm:text-sm font-medium flex items-center justify-between gap-3 shadow-xs">
+                        <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
+                            <span>{deleteErrorMsg}</span>
+                        </div>
+                        <button
+                            onClick={() => setDeleteErrorMsg(null)}
+                            className="text-error hover:opacity-70 cursor-pointer p-1 rounded-md"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">close</span>
+                        </button>
+                    </div>
+                )}
 
                 {/* Table container */}
                 <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col">
@@ -145,7 +169,7 @@ export default function ClientesPage() {
                                                         Editar
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDelete(c)}
+                                                        onClick={() => setClienteToDelete(c)}
                                                         className="flex items-center gap-1.5 px-3 py-1 rounded-lg border border-error/30 text-error text-xs hover:bg-error/10 transition-colors cursor-pointer font-medium"
                                                     >
                                                         <span className="material-symbols-outlined text-[16px]">delete</span>
@@ -175,6 +199,18 @@ export default function ClientesPage() {
                     setSelectedCliente(null);
                 }}
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+
+            {/* Confirmación para Eliminar Cliente */}
+            <ConfirmModal
+                isOpen={clienteToDelete !== null}
+                title="Eliminar Cliente"
+                message={`¿Estás seguro de que deseas eliminar al cliente "${clienteToDelete?.nombre_completo}"? Esta acción no se podrá deshacer.`}
+                confirmText="Eliminar Cliente"
+                cancelText="Cancelar"
+                isDanger={true}
+                onCancel={() => setClienteToDelete(null)}
+                onConfirm={confirmDeleteCliente}
             />
         </DashboardLayout>
     );

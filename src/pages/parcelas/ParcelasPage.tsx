@@ -60,11 +60,11 @@ export default function ParcelasPage() {
                             />
                         </div>
                         {/* Action buttons row */}
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                             {/* Papelera Action */}
                             <button
                                 onClick={() => setIsPapeleraOpen(true)}
-                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer"
+                                className="col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low shadow-sm transition-colors font-medium text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                                 title="Ver parcelas en la papelera"
                             >
                                 <span className="material-symbols-outlined text-[18px] text-error">delete_sweep</span>
@@ -73,7 +73,7 @@ export default function ParcelasPage() {
                             {/* Nuevo Loteo Action */}
                             <button
                                 onClick={() => setIsSubdivisionModalOpen(true)}
-                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-data-tabular text-sm cursor-pointer whitespace-nowrap"
+                                className="col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-medium text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                             >
                                 <span className="material-symbols-outlined text-[18px] text-primary">format_list_bulleted</span>
                                 Gestionar Loteos
@@ -81,7 +81,7 @@ export default function ParcelasPage() {
                             {/* Primary Action (New Parcel) */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 bg-primary-container text-on-primary-container rounded-lg font-data-tabular text-sm hover:bg-primary-container/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap"
+                                className="col-span-2 sm:col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-primary text-on-primary rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap"
                             >
                                 <span className="material-symbols-outlined text-[18px]">add</span>
                                 Nueva Parcela

@@ -135,7 +135,6 @@ export default function ParcelasTable({
                         <tr className="text-center">
                             <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Lote</th>
                             <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Propietario</th>
-                            <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Superficie (m²)</th>
                             <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Escritura</th>
                             <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Precio Venta</th>
                             <th className="py-3 px-4 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-center border-r border-outline-variant">Abono</th>
@@ -150,7 +149,7 @@ export default function ParcelasTable({
                             skeletons.map((_, i) => <ParcelaRowSkeleton key={i} />)
                         ) : error ? (
                             <tr>
-                                <td colSpan={9} className="py-8 px-6 text-center text-error font-medium">
+                                <td colSpan={8} className="py-8 px-6 text-center text-error font-medium">
                                     {error.message || "Error"}
                                 </td>
                             </tr>
@@ -167,7 +166,7 @@ export default function ParcelasTable({
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={9} className="py-8 px-6 text-center text-on-surface-variant/70">
+                                <td colSpan={8} className="py-8 px-6 text-center text-on-surface-variant/70">
                                     No se encontraron parcelas que coincidan con la búsqueda.
                                 </td>
                             </tr>

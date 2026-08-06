@@ -4,7 +4,6 @@ export const parcelas: Parcela[] = [
     {
         id: "P-1001",
         owner: "Carlos Mendoza",
-        surface: 1250,
         escritura: "123456789",
         precioVenta: 10000000,
         abono: 2000000,
@@ -14,7 +13,6 @@ export const parcelas: Parcela[] = [
     {
         id: "P-1002",
         owner: "Laura Rodríguez",
-        surface: 850,
         escritura: "123456789",
         precioVenta: 10000000,
         abono: 2000000,
@@ -24,7 +22,6 @@ export const parcelas: Parcela[] = [
     {
         id: "P-1003",
         owner: "Javier Gómez",
-        surface: 2100,
         escritura: "123456789",
         precioVenta: 10000000,
         abono: 2000000,
@@ -34,7 +31,6 @@ export const parcelas: Parcela[] = [
     {
         id: "P-1004",
         owner: "Ana Fernández",
-        surface: 500,
         escritura: "123456789",
         precioVenta: 10000000,
         abono: 2000000,
@@ -44,7 +40,6 @@ export const parcelas: Parcela[] = [
     {
         id: "P-1005",
         owner: "Sin Asignar",
-        surface: 1800,
         escritura: "123456789",
         precioVenta: 10000000,
         abono: 2000000,

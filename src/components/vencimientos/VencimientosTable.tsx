@@ -97,10 +97,10 @@ export const VencimientosTable = ({
         <table className="w-full border-collapse text-left min-w-[1150px]">
           <thead>
             <tr className="bg-surface-container-low border-b border-outline-variant">
-              <th className="p-3 sm:p-md font-label-md text-label-md text-on-surface-variant sticky left-0 z-20 bg-surface-container-low border-r border-outline-variant min-w-[180px] sm:min-w-[200px] shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+              <th className="p-2 sm:p-md font-label-md text-label-md text-on-surface-variant sticky left-0 z-20 bg-surface-container-low border-r border-outline-variant min-w-[130px] max-w-[130px] sm:min-w-[200px] sm:max-w-none shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
                 Lote / Cliente
               </th>
-              <th className="p-3 sm:p-md font-label-md text-label-md text-on-surface-variant text-center border-r border-outline-variant w-[100px] sm:w-[110px]">
+              <th className="p-1.5 sm:p-md font-label-md text-label-md text-on-surface-variant text-center border-r border-outline-variant w-[75px] sm:w-[110px] min-w-[75px] sm:min-w-[110px]">
                 Resumen
               </th>
               {months.map((mes) => (
