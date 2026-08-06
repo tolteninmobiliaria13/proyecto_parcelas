@@ -163,7 +163,6 @@ export const crearParcela = async (data: {
     numero_lote: string;
     numero_rol?: string | null;
     subdivision: string;
-    superficie_m2?: number | null;
     precio_base: number;
     estado?: string;
 }): Promise<Parcela> => {
@@ -188,7 +187,6 @@ export interface AsignarPropietarioPayload {
     cliente_email?: string | null;
     cliente_telefono?: string | null;
     fecha_pago: string; // "YYYY-MM-DD" (Primer vencimiento)
-    fecha_firma?: string; // "YYYY-MM-DD" (Firma de contrato)
     pie_inicial: number;
     total_cuotas: number;
     monto_cuota: number;
@@ -305,7 +303,6 @@ export const updateParcela = async (
         numero_lote: string;
         numero_rol?: string | null;
         subdivision: string;
-        superficie_m2?: number | null;
         precio_base: number;
         estado?: string;
     }
@@ -432,7 +429,6 @@ export interface ContratoDetalle {
     cliente_id: string;
     cliente_nombre: string;
     fecha_pago: string;
-    fecha_firma?: string;
     pie_inicial: number;
     total_cuotas: number;
     monto_cuota: number;

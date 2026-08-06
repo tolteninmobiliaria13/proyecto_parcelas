@@ -207,10 +207,6 @@ export function ParcelaCard({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs bg-surface-container-low/60 p-2.5 rounded-lg border border-outline-variant/30">
                 <div>
-                    <span className="text-on-surface-variant block text-[11px]">Superficie</span>
-                    <span className="font-medium text-on-surface">{parcela.surface.toLocaleString("es-CL")} m²</span>
-                </div>
-                <div>
                     <span className="text-on-surface-variant block text-[11px]">Escritura</span>
                     <span className="font-medium text-on-surface">{parcela.escritura}</span>
                 </div>
@@ -253,9 +249,6 @@ export default function ParcelaRow({
                     </div>
                     <span className="font-medium text-on-surface">{parcela.owner}</span>
                 </div>
-            </td>
-            <td className="py-4 px-4 text-on-surface-variant whitespace-nowrap text-center border-r border-outline-variant font-medium">
-                {parcela.surface.toLocaleString("es-CL")} m²
             </td>
             <td className="py-4 px-4 text-on-surface-variant whitespace-nowrap text-center border-r border-outline-variant font-mono text-xs">
                 {parcela.escritura}

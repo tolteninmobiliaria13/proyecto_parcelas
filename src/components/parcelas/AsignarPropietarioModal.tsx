@@ -26,9 +26,6 @@ export default function AsignarPropietarioModal({
     const [clienteEmail, setClienteEmail] = useState("");
     const [clienteTelefono, setClienteTelefono] = useState("");
 
-    const [fechaFirma, setFechaFirma] = useState(
-        new Date().toISOString().substring(0, 10) // "YYYY-MM-DD"
-    );
     const [fechaPago, setFechaPago] = useState(
         new Date().toISOString().substring(0, 10) // "YYYY-MM-DD"
     );
@@ -92,7 +89,6 @@ export default function AsignarPropietarioModal({
                 .then((detail) => {
                     setClienteMode("existing");
                     setSelectedClienteId(detail.cliente_id);
-                    setFechaFirma(detail.fecha_firma || detail.fecha_pago);
                     setFechaPago(detail.fecha_pago);
                     setPieInicial(String(detail.pie_inicial));
                     setTotalCuotas(String(detail.total_cuotas));
@@ -123,7 +119,6 @@ export default function AsignarPropietarioModal({
             setTotalCuotas("12");
             setCuotasPagadas("0");
             const todayISO = new Date().toISOString().substring(0, 10);
-            setFechaFirma(todayISO);
             setFechaPago(todayISO);
             setError(null);
         }
@@ -165,11 +160,6 @@ export default function AsignarPropietarioModal({
             setLoadingSubmit(false);
             return;
         }
-        if (!fechaFirma) {
-            setError("La fecha de firma del contrato es obligatoria.");
-            setLoadingSubmit(false);
-            return;
-        }
         if (!fechaPago) {
             setError("La fecha asignada de pago es obligatoria.");
             setLoadingSubmit(false);
@@ -204,7 +194,6 @@ export default function AsignarPropietarioModal({
         }
 
         const payload: AsignarPropietarioPayload = {
-            fecha_firma: fechaFirma,
             fecha_pago: fechaPago,
             pie_inicial: Number(pieInicial) || 0,
             total_cuotas: Number(totalCuotas),
@@ -433,23 +422,8 @@ export default function AsignarPropietarioModal({
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            {/* Fecha de Firma */}
-                            <div className="flex flex-col gap-1">
-                                <label className="text-xs font-semibold text-on-surface-variant">
-                                    Fecha de Firma de Contrato *
-                                </label>
-                                <input
-                                    type="date"
-                                    value={fechaFirma}
-                                    onChange={(e) => setFechaFirma(e.target.value)}
-                                    disabled={loadingSubmit}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none cursor-pointer"
-                                    required
-                                />
-                            </div>
-
                             {/* Fecha Asignada de Pago */}
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 sm:col-span-2">
                                 <label className="text-xs font-semibold text-on-surface-variant">
                                     {modalidad === "contado" ? "Fecha de Pago *" : "Fecha Asignada de Pago *"}
                                 </label>
