@@ -101,16 +101,16 @@ function RowActionsMenu() {
 }
 
 export function LotCard({ lot, activeTab = "morosos" }: LotRowProps) {
-    const isOverdue = lot.status === "overdue";
+    const isOverdue = lot.status === "overdue" || (lot.overdueCount ? lot.overdueCount > 0 : false);
     const initials = getInitials(lot.owner);
 
     const displayAmount = activeTab === "pendientes"
         ? lot.installmentValue
-        : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance);
+        : (activeTab === "morosos" ? (lot.overdueBalance ?? 0) : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance));
 
     const amountLabel = activeTab === "pendientes"
         ? "Valor Cuota"
-        : (isOverdue ? "Deuda Vencida" : "Saldo");
+        : (activeTab === "morosos" || isOverdue ? "Deuda Vencida" : "Saldo");
 
     return (
         <div className={`p-4 flex flex-col gap-3 transition-colors ${isOverdue ? "bg-error-container/10" : "bg-surface-container-lowest"}`}>
@@ -159,12 +159,12 @@ export function LotCard({ lot, activeTab = "morosos" }: LotRowProps) {
 }
 
 export default function LotRow({ lot, activeTab = "morosos" }: LotRowProps) {
-    const isOverdue = lot.status === "overdue";
+    const isOverdue = lot.status === "overdue" || (lot.overdueCount ? lot.overdueCount > 0 : false);
     const initials = getInitials(lot.owner);
 
     const displayAmount = activeTab === "pendientes"
         ? lot.installmentValue
-        : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance);
+        : (activeTab === "morosos" ? (lot.overdueBalance ?? 0) : (isOverdue ? (lot.overdueBalance ?? lot.balance) : lot.balance));
 
     return (
         <tr className={`hover:bg-surface-container/60 transition-colors group text-center ${isOverdue ? "bg-error-container/5" : ""}`}>
