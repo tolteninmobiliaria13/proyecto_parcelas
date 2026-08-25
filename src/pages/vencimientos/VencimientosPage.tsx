@@ -170,7 +170,14 @@ export const VencimientosPage = () => {
                                 <span className="text-[13px] text-on-surface-variant font-medium">Estado</span>
                                 <select
                                     value={editStatus}
-                                    onChange={(e) => setEditStatus(e.target.value)}
+                                    onChange={(e) => {
+                                        const newStatus = e.target.value;
+                                        setEditStatus(newStatus);
+                                        if (newStatus === "paid" && !editPaidDate) {
+                                            const todayIso = new Date().toISOString().split("T")[0];
+                                            setEditPaidDate(editDueDate || todayIso);
+                                        }
+                                    }}
                                     disabled={loadingSavePayment}
                                     className="px-2 py-1 text-xs border border-outline-variant rounded bg-surface-container-lowest text-on-surface outline-none font-medium cursor-pointer"
                                 >
@@ -181,7 +188,7 @@ export const VencimientosPage = () => {
                             </div>
 
                             <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
-                                <span className="text-[13px] text-on-surface-variant font-medium">Monto CLP</span>
+                                <span className="text-[13px] text-on-surface-variant font-medium">Monto Cuota CLP</span>
                                 <input
                                     type="number"
                                     value={editAmount}
@@ -192,7 +199,10 @@ export const VencimientosPage = () => {
                             </div>
 
                             <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40">
-                                <span className="text-[13px] text-on-surface-variant font-medium">Vencimiento</span>
+                                <div>
+                                    <span className="text-[13px] text-on-surface-variant font-medium block">Fecha Vencimiento</span>
+                                    <span className="text-[10px] text-outline">Día pactado de la cuota</span>
+                                </div>
                                 <input
                                     type="date"
                                     value={editDueDate}
@@ -203,8 +213,11 @@ export const VencimientosPage = () => {
                             </div>
 
                             {editStatus === "paid" && (
-                                <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40 animate-fade-in">
-                                    <span className="text-[13px] text-on-surface-variant font-medium">Fecha de Pago</span>
+                                <div className="flex justify-between items-center py-1.5 border-b border-outline-variant/40 animate-fade-in bg-primary/5 px-2 rounded-lg">
+                                    <div>
+                                        <span className="text-[13px] text-primary font-medium block">Fecha Pago Real</span>
+                                        <span className="text-[10px] text-on-surface-variant">Día en que el cliente abonó</span>
+                                    </div>
                                     <input
                                         type="date"
                                         value={editPaidDate}

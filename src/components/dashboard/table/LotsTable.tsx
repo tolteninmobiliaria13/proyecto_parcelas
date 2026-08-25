@@ -111,7 +111,7 @@ function TablePanel({ rows, loading, error, emptyText, activeTab }: TablePanelPr
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Lote</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Propietario</th>
                             <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">
-                                {activeTab === "morosos" ? "Deuda Total" : "Valor Cuota"}
+                                {activeTab === "morosos" ? "Deuda Vencida" : "Valor Cuota"}
                             </th>
                             {activeTab === "morosos" && (
                                 <th className="py-3 px-6 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider border-r border-outline-variant">Cuotas Atrasadas</th>
