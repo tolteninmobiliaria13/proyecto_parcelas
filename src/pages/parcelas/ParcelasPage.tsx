@@ -4,8 +4,9 @@ import ParcelasTable from "../../components/parcelas/ParcelasTable";
 import NuevaParcelaModal from "../../components/parcelas/NuevaParcelaModal";
 import EditarParcelaModal from "../../components/parcelas/EditarParcelaModal";
 import AsignarPropietarioModal from "../../components/parcelas/AsignarPropietarioModal";
+import CambiarPropietarioModal from "../../components/parcelas/CambiarPropietarioModal";
+import EditarContratoModal from "../../components/parcelas/EditarContratoModal";
 import SubdivisionesModal from "../../components/parcelas/SubdivisionesModal";
-import PapeleraModal from "../../components/parcelas/PapeleraModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { deleteParcela } from "../../services/api";
 import type { Parcela } from "../../types/parcela";
@@ -14,9 +15,11 @@ export default function ParcelasPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSubdivisionModalOpen, setIsSubdivisionModalOpen] = useState(false);
-    const [isPapeleraOpen, setIsPapeleraOpen] = useState(false);
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [selectedParcela, setSelectedParcela] = useState<Parcela | null>(null);
+
+    const [parcelaToAssign, setParcelaToAssign] = useState<Parcela | null>(null);
+    const [parcelaToEditOwner, setParcelaToEditOwner] = useState<Parcela | null>(null);
+    const [parcelaToEditContrato, setParcelaToEditContrato] = useState<Parcela | null>(null);
     const [parcelaToEdit, setParcelaToEdit] = useState<Parcela | null>(null);
     const [parcelaToMoveToPapelera, setParcelaToMoveToPapelera] = useState<Parcela | null>(null);
 
@@ -60,20 +63,11 @@ export default function ParcelasPage() {
                             />
                         </div>
                         {/* Action buttons row */}
-                        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
-                            {/* Papelera Action */}
-                            <button
-                                onClick={() => setIsPapeleraOpen(true)}
-                                className="col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-low shadow-sm transition-colors font-medium text-xs sm:text-sm cursor-pointer whitespace-nowrap"
-                                title="Ver parcelas en la papelera"
-                            >
-                                <span className="material-symbols-outlined text-[18px] text-error">delete_sweep</span>
-                                Papelera
-                            </button>
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
                             {/* Nuevo Loteo Action */}
                             <button
                                 onClick={() => setIsSubdivisionModalOpen(true)}
-                                className="col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-medium text-xs sm:text-sm cursor-pointer whitespace-nowrap"
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-low shadow-sm transition-colors font-medium text-xs sm:text-sm cursor-pointer whitespace-nowrap"
                             >
                                 <span className="material-symbols-outlined text-[18px] text-primary">format_list_bulleted</span>
                                 Gestionar Loteos
@@ -81,7 +75,7 @@ export default function ParcelasPage() {
                             {/* Primary Action (New Parcel) */}
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="col-span-2 sm:col-span-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-primary text-on-primary rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap"
+                                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 bg-primary text-on-primary rounded-lg font-semibold text-xs sm:text-sm hover:bg-primary/90 shadow-sm transition-colors cursor-pointer whitespace-nowrap"
                             >
                                 <span className="material-symbols-outlined text-[18px]">add</span>
                                 Nueva Parcela
@@ -94,9 +88,10 @@ export default function ParcelasPage() {
                 <ParcelasTable
                     searchQuery={searchQuery}
                     refreshTrigger={refreshTrigger}
-                    onAssignOwner={(p) => setSelectedParcela(p)}
+                    onAssignOwner={(p) => setParcelaToAssign(p)}
+                    onEditOwner={(p) => setParcelaToEditOwner(p)}
                     onEditParcela={(p) => setParcelaToEdit(p)}
-                    onEditContrato={(p) => setSelectedParcela(p)}
+                    onEditContrato={(p) => setParcelaToEditContrato(p)}
                     onDeleteParcela={(p) => setParcelaToMoveToPapelera(p)}
                 />
             </div>
@@ -123,25 +118,44 @@ export default function ParcelasPage() {
                 onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
             />
 
-            {/* Asignar / Editar Propietario y Contrato Modal */}
-            {selectedParcela && (
+            {/* Asignar Propietario Inicial Modal */}
+            {parcelaToAssign && (
                 <AsignarPropietarioModal
-                    isOpen={Boolean(selectedParcela)}
-                    parcela={selectedParcela}
-                    onClose={() => setSelectedParcela(null)}
+                    isOpen={Boolean(parcelaToAssign)}
+                    parcela={parcelaToAssign}
+                    onClose={() => setParcelaToAssign(null)}
                     onSuccess={() => {
-                        setSelectedParcela(null);
+                        setParcelaToAssign(null);
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                 />
             )}
 
-            {/* Papelera Modal */}
-            <PapeleraModal
-                isOpen={isPapeleraOpen}
-                onClose={() => setIsPapeleraOpen(false)}
-                onChanged={() => setRefreshTrigger((prev) => prev + 1)}
-            />
+            {/* Cambiar Titular / Propietario Modal */}
+            {parcelaToEditOwner && (
+                <CambiarPropietarioModal
+                    isOpen={Boolean(parcelaToEditOwner)}
+                    parcela={parcelaToEditOwner}
+                    onClose={() => setParcelaToEditOwner(null)}
+                    onSuccess={() => {
+                        setParcelaToEditOwner(null);
+                        setRefreshTrigger((prev) => prev + 1);
+                    }}
+                />
+            )}
+
+            {/* Editar Condiciones de Contrato Modal */}
+            {parcelaToEditContrato && (
+                <EditarContratoModal
+                    isOpen={Boolean(parcelaToEditContrato)}
+                    parcela={parcelaToEditContrato}
+                    onClose={() => setParcelaToEditContrato(null)}
+                    onSuccess={() => {
+                        setParcelaToEditContrato(null);
+                        setRefreshTrigger((prev) => prev + 1);
+                    }}
+                />
+            )}
 
             {/* Confirmación para Mover a Papelera */}
             <ConfirmModal
@@ -157,3 +171,4 @@ export default function ParcelasPage() {
         </DashboardLayout>
     );
 }
+

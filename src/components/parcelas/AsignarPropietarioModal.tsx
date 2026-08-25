@@ -55,38 +55,14 @@ export default function AsignarPropietarioModal({
         }
     };
 
-    // Fetch clients on mount when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            setLoadingClientes(true);
-            getClientes()
-                .then((data) => {
-                    setClientes(data);
-                    if (!isEditMode) {
-                        if (data.length > 0) {
-                            setClienteMode("existing");
-                            setSelectedClienteId(data[0].id);
-                        } else {
-                            setClienteMode("new");
-                        }
-                    }
-                })
-                .catch((err) => {
-                    console.error("Error al obtener clientes:", err);
-                })
-                .finally(() => {
-                    if (!isEditMode) setLoadingClientes(false);
-                });
-        }
-    }, [isOpen, isEditMode]);
-
-    // Fetch contract details in edit mode
+    // Fetch clients and contract details on mount when modal opens
     useEffect(() => {
         if (isOpen && parcela && isEditMode) {
             setLoadingClientes(true);
             setError(null);
-            getContratoDetalle(parcela.id)
-                .then((detail) => {
+            Promise.all([getClientes(), getContratoDetalle(parcela.id)])
+                .then(([clientsList, detail]) => {
+                    setClientes(clientsList);
                     setClienteMode("existing");
                     setSelectedClienteId(detail.cliente_id);
                     setFechaPago(detail.fecha_pago);
@@ -96,7 +72,7 @@ export default function AsignarPropietarioModal({
                     setCuotasPagadas(String(detail.cuotas_pagadas));
                     if (detail.tipo_pago) {
                         setModalidad(detail.tipo_pago);
-                    } else if (detail.total_cuotas === 0) {
+                    } else if (detail.total_cuotas <= 1) {
                         setModalidad("contado");
                     } else {
                         setModalidad("credito");
@@ -109,7 +85,26 @@ export default function AsignarPropietarioModal({
                 .finally(() => {
                     setLoadingClientes(false);
                 });
-        } else if (isOpen && !isEditMode) {
+        } else if (isOpen && parcela && !isEditMode) {
+            setLoadingClientes(true);
+            setError(null);
+            getClientes()
+                .then((data) => {
+                    setClientes(data);
+                    if (data.length > 0) {
+                        setClienteMode("existing");
+                        setSelectedClienteId(data[0].id);
+                    } else {
+                        setClienteMode("new");
+                    }
+                })
+                .catch((err) => {
+                    console.error("Error al obtener clientes:", err);
+                })
+                .finally(() => {
+                    setLoadingClientes(false);
+                });
+
             // Reset fields for new contract
             setClienteNombre("");
             setClienteEmail("");
@@ -120,13 +115,12 @@ export default function AsignarPropietarioModal({
             setCuotasPagadas("0");
             const todayISO = new Date().toISOString().substring(0, 10);
             setFechaPago(todayISO);
-            setError(null);
         }
-    }, [isOpen, parcela, isEditMode]);
+    }, [isOpen, parcela?.id, isEditMode]);
 
-    // Auto-calculate suggested installment amount
+    // Auto-calculate suggested installment amount for new assignments
     useEffect(() => {
-        if (parcela) {
+        if (parcela && !isEditMode) {
             if (modalidad === "contado") {
                 const pie = Number(pieInicial) || 0;
                 setTotalCuotas("1");
@@ -139,7 +133,7 @@ export default function AsignarPropietarioModal({
                 setMontoCuota(String(suggestion));
             }
         }
-    }, [parcela, pieInicial, totalCuotas, modalidad]);
+    }, [parcela, pieInicial, totalCuotas, modalidad, isEditMode]);
 
 
     if (!isOpen || !parcela) return null;
@@ -339,8 +333,8 @@ export default function AsignarPropietarioModal({
                                 )}
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
-                                <div className="flex flex-col gap-1 sm:col-span-2">
+                            <div className="flex flex-col gap-3 animate-fade-in">
+                                <div className="flex flex-col gap-1">
                                     <label className="text-xs font-semibold text-on-surface-variant">
                                         Nombre Completo *
                                     </label>
@@ -421,9 +415,9 @@ export default function AsignarPropietarioModal({
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="flex flex-col gap-3">
                             {/* Fecha Asignada de Pago */}
-                            <div className="flex flex-col gap-1 sm:col-span-2">
+                            <div className="flex flex-col gap-1">
                                 <label className="text-xs font-semibold text-on-surface-variant">
                                     {modalidad === "contado" ? "Fecha de Pago *" : "Fecha Asignada de Pago *"}
                                 </label>
@@ -439,7 +433,7 @@ export default function AsignarPropietarioModal({
                             </div>
 
                             {/* Pie Inicial / Abono */}
-                            <div className="flex flex-col gap-1 sm:col-span-2">
+                            <div className="flex flex-col gap-1">
                                 <label className="text-xs font-semibold text-on-surface-variant">
                                     {modalidad === "contado" ? "Monto Total Pagado Al Contado (CLP) *" : "Pie Inicial (CLP) *"}
                                 </label>
@@ -489,7 +483,7 @@ export default function AsignarPropietarioModal({
                                     </div>
 
                                     {/* Valor Cuota */}
-                                    <div className="flex flex-col gap-1 sm:col-span-2">
+                                    <div className="flex flex-col gap-1">
                                         <label className="text-xs font-semibold text-on-surface-variant">
                                             Valor Cuota Estimada (CLP) *
                                         </label>

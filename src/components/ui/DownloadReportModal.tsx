@@ -158,7 +158,7 @@ export default function DownloadReportModal({
                 </div>
 
                 {/* Period Selectors */}
-                <div className="grid grid-cols-2 gap-3 p-3 bg-surface-container-low/40 border border-outline-variant/30 rounded-xl">
+                <div className="flex flex-col gap-3 p-3 bg-surface-container-low/40 border border-outline-variant/30 rounded-xl">
                     <div className="flex flex-col gap-1">
                         <label className="text-xs font-semibold text-on-surface-variant">
                             Mes del Reporte *

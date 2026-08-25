@@ -17,32 +17,31 @@ function getInitials(name: string) {
     return name.slice(0, 2).toUpperCase();
 }
 
-function RowActionsMenu() {
+function RowActionsMenu({ lot }: { lot?: Lot }) {
     const [isOpen, setIsOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
+    const [coords, setCoords] = useState({ top: 0, left: 0 });
     const buttonRef = useRef<HTMLButtonElement>(null);
-    const [coords, setCoords] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+    const menuRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
-    const handleToggle = (e: React.MouseEvent) => {
-        e.stopPropagation();
+    const handleToggle = () => {
         if (!isOpen && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect();
             setCoords({
-                top: rect.bottom + window.scrollY,
-                left: rect.right + window.scrollX - 160, // 160px width
+                top: rect.bottom + window.scrollY + 4,
+                left: rect.right + window.scrollX - 160,
             });
         }
         setIsOpen(!isOpen);
     };
 
     useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
+        const handleClickOutside = (event: MouseEvent) => {
             if (
                 menuRef.current &&
-                !menuRef.current.contains(e.target as Node) &&
+                !menuRef.current.contains(event.target as Node) &&
                 buttonRef.current &&
-                !buttonRef.current.contains(e.target as Node)
+                !buttonRef.current.contains(event.target as Node)
             ) {
                 setIsOpen(false);
             }
@@ -52,14 +51,32 @@ function RowActionsMenu() {
             if (isOpen) setIsOpen(false);
         };
 
-        document.addEventListener("mousedown", handleClickOutside);
-        window.addEventListener("scroll", handleScroll, true);
+        if (isOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+            window.addEventListener("scroll", handleScroll, true);
+        }
 
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
             window.removeEventListener("scroll", handleScroll, true);
         };
     }, [isOpen]);
+
+    const handleGoToVencimientos = () => {
+        setIsOpen(false);
+        if (lot) {
+            let yearParam = "";
+            if (lot.nextDueDate) {
+                const parts = lot.nextDueDate.split("/");
+                if (parts.length === 3 && parts[2]) {
+                    yearParam = `&year=${parts[2]}`;
+                }
+            }
+            navigate(`/vencimientos?lote=${encodeURIComponent(lot.lot)}${yearParam}`);
+        } else {
+            navigate("/vencimientos");
+        }
+    };
 
     return (
         <div className="relative inline-block text-left">
@@ -83,10 +100,7 @@ function RowActionsMenu() {
                         className="absolute z-50 w-40 rounded-xl bg-surface-container-lowest border border-outline-variant shadow-xl py-1 text-xs text-on-surface font-medium animate-fade-in"
                     >
                         <button
-                            onClick={() => {
-                                setIsOpen(false);
-                                navigate("/vencimientos");
-                            }}
+                            onClick={handleGoToVencimientos}
                             className="w-full px-3 py-2 text-left hover:bg-surface-container-low transition-colors flex items-center gap-2 cursor-pointer"
                         >
                             <span className="material-symbols-outlined text-[16px] text-primary">calendar_month</span>
@@ -118,7 +132,7 @@ export function LotCard({ lot, activeTab = "morosos" }: LotRowProps) {
                 <span className="font-semibold text-primary text-base">{lot.lot}</span>
                 <div className="flex items-center gap-1">
                     <LotStatus status={lot.status} />
-                    <RowActionsMenu />
+                    <RowActionsMenu lot={lot} />
                 </div>
             </div>
 
@@ -206,7 +220,7 @@ export default function LotRow({ lot, activeTab = "morosos" }: LotRowProps) {
             </td>
             <td className="py-4 px-6 text-center whitespace-nowrap">
                 <div className="flex items-center justify-center">
-                    <RowActionsMenu />
+                    <RowActionsMenu lot={lot} />
                 </div>
             </td>
         </tr>

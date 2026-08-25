@@ -410,6 +410,28 @@ export const deleteCliente = async (clienteId: string): Promise<void> => {
     clearCache('contrato_detalle');
 };
 
+export interface CambiarPropietarioPayload {
+    cliente_id?: string | null;
+    cliente_nombre?: string | null;
+    cliente_email?: string | null;
+    cliente_telefono?: string | null;
+}
+
+/**
+ * Cambia o asigna el titular / propietario del contrato activo de una parcela.
+ */
+export const cambiarPropietario = async (
+    loteId: string,
+    data: CambiarPropietarioPayload
+): Promise<Parcela> => {
+    const response = await apiClient.put<Parcela>(`/parcelas/${loteId}/propietario`, data);
+    clearCache('parcelas');
+    clearCache('dashboard');
+    clearCache('vencimientos');
+    clearCache('contrato_detalle');
+    return response.data;
+};
+
 /**
  * Actualiza el contrato y plan de cuotas de una parcela.
  */

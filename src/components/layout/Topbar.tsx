@@ -72,9 +72,13 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                     <span className="material-symbols-outlined text-[24px]">menu</span>
                 </button>
 
-                <h2 className="font-headline-md text-base sm:text-headline-md font-semibold text-on-surface truncate">
+                <Link
+                    to="/dashboard"
+                    className="font-headline-md text-base sm:text-headline-md font-semibold text-on-surface hover:text-primary transition-colors truncate cursor-pointer"
+                    title="Ir a la página de Resumen"
+                >
                     Panel de Gestión de Parcelas
-                </h2>
+                </Link>
             </div>
 
             <div className="flex items-center gap-sm sm:gap-md shrink-0">

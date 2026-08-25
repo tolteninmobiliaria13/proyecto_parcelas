@@ -5,6 +5,7 @@ import DashboardPage from "../pages/dashboard/Dashboardpage";
 import ParcelasPage from "../pages/parcelas/ParcelasPage";
 import ClientesPage from "../pages/clientes/ClientesPage";
 import VencimientosPage from "../pages/vencimientos/VencimientosPage";
+import PapeleraPage from "../pages/papelera/PapeleraPage";
 import Usuarios from "../pages/usuarios/Usuarios";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
@@ -38,6 +39,11 @@ export default function AppRouter() {
                     <Route
                         path="/vencimientos"
                         element={<VencimientosPage />}
+                    />
+
+                    <Route
+                        path="/papelera"
+                        element={<PapeleraPage />}
                     />
 
                     <Route element={<AdminRoute />}>

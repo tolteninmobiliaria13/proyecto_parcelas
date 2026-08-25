@@ -13,6 +13,7 @@ interface VencimientosTableProps {
   onCellClick?: (lot: LotPaymentMatrix, payment: MonthlyPayment) => void;
   loading?: boolean;
   error?: string | null;
+  targetLote?: string;
 }
 
 function VencimientosRowSkeleton({ monthsCount }: { monthsCount: number }) {
@@ -41,14 +42,25 @@ export const VencimientosTable = ({
   onCellClick,
   loading = false,
   error = null,
+  targetLote = '',
 }: VencimientosTableProps) => {
   const [page, setPage] = useState(1);
   const months = monthsList;
   const sortedData = sortParcelasByLote(data);
 
   useEffect(() => {
+    if (targetLote && sortedData.length > 0) {
+      const index = sortedData.findIndex(
+        (item) => item.lotNumber?.trim().toLowerCase() === targetLote.trim().toLowerCase()
+      );
+      if (index !== -1) {
+        const targetPage = Math.floor(index / ITEMS_PER_PAGE) + 1;
+        setPage(targetPage);
+        return;
+      }
+    }
     setPage(1);
-  }, [data, selectedYear]);
+  }, [data, selectedYear, targetLote]);
 
   const totalPages = Math.ceil(sortedData.length / ITEMS_PER_PAGE) || 1;
   const paginatedData = sortedData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
@@ -145,6 +157,10 @@ export const VencimientosTable = ({
                   key={row.id}
                   row={row}
                   onCellClick={onCellClick}
+                  isHighlighted={Boolean(
+                    targetLote &&
+                    row.lotNumber?.trim().toLowerCase() === targetLote.trim().toLowerCase()
+                  )}
                 />
               ))
             )}

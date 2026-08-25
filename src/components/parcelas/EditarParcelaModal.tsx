@@ -139,32 +139,30 @@ export default function EditarParcelaModal({
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">Número de Lote *</label>
-                            <input
-                                type="text"
-                                name="numero_lote"
-                                value={formData.numero_lote}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                                required
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">Número de Lote *</label>
+                        <input
+                            type="text"
+                            name="numero_lote"
+                            value={formData.numero_lote}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                            required
+                        />
+                    </div>
 
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">Número de ROL</label>
-                            <input
-                                type="text"
-                                name="numero_rol"
-                                value={formData.numero_rol}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
-                            />
-                        </div>
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">Número de ROL</label>
+                        <input
+                            type="text"
+                            name="numero_rol"
+                            value={formData.numero_rol}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full text-sm outline-none shadow-xs"
+                        />
                     </div>
 
                     <div className="flex flex-col gap-1">
