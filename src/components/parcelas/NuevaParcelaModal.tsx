@@ -142,111 +142,107 @@ export default function NuevaParcelaModal({ isOpen, onClose, onSuccess }: NuevaP
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Lote */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Número de Lote *
-                            </label>
-                            <input
-                                type="text"
-                                name="numero_lote"
-                                placeholder="Ej: P-1050"
-                                value={formData.numero_lote}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                                required
-                            />
-                        </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-3.5 py-2">
+                    {/* Lote */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">
+                            Número de Lote *
+                        </label>
+                        <input
+                            type="text"
+                            name="numero_lote"
+                            placeholder="Ej: P-1050"
+                            value={formData.numero_lote}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
+                            required
+                        />
+                    </div>
 
-                        {/* Proyecto/Subdivisión */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Subdivisión / Proyecto *
-                            </label>
-                            {subdivisionesList.length > 0 ? (
-                                <select
-                                    name="subdivision"
-                                    value={formData.subdivision}
-                                    onChange={handleChange}
-                                    disabled={loading}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow cursor-pointer"
-                                    required
-                                >
-                                    {subdivisionesList.map((sub) => (
-                                        <option key={sub.id} value={sub.nombre}>
-                                            {sub.numero ? `Loteo N° ${sub.numero} - ${sub.nombre}` : sub.nombre}
-                                        </option>
-                                    ))}
-                                </select>
-                            ) : (
-                                <input
-                                    type="text"
-                                    name="subdivision"
-                                    placeholder="Ej: Toltén Fases 1"
-                                    value={formData.subdivision}
-                                    onChange={handleChange}
-                                    disabled={loading}
-                                    className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                                    required
-                                />
-                            )}
-                        </div>
-
-                        {/* ROL */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Número de ROL (Escritura)
-                            </label>
-                            <input
-                                type="text"
-                                name="numero_rol"
-                                placeholder="Ej: 123-45"
-                                value={formData.numero_rol}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                            />
-                        </div>
-
-
-
-                        {/* Precio Base */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Precio Venta (CLP) *
-                            </label>
-                            <input
-                                type="number"
-                                name="precio_base"
-                                placeholder="Ej: 15000000"
-                                value={formData.precio_base}
-                                onChange={handleChange}
-                                disabled={loading}
-                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                                required
-                            />
-                        </div>
-
-                        {/* Estado */}
-                        <div className="flex flex-col gap-1">
-                            <label className="text-xs font-semibold text-on-surface-variant">
-                                Estado *
-                            </label>
+                    {/* Proyecto/Subdivisión */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">
+                            Subdivisión / Proyecto *
+                        </label>
+                        {subdivisionesList.length > 0 ? (
                             <select
-                                name="estado"
-                                value={formData.estado}
+                                name="subdivision"
+                                value={formData.subdivision}
+                                onChange={handleChange}
+                                disabled={loading}
+                                className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow cursor-pointer"
+                                required
+                            >
+                                {subdivisionesList.map((sub) => (
+                                    <option key={sub.id} value={sub.nombre}>
+                                        {sub.numero ? `Loteo N° ${sub.numero} - ${sub.nombre}` : sub.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        ) : (
+                            <input
+                                type="text"
+                                name="subdivision"
+                                placeholder="Ej: Toltén Fases 1"
+                                value={formData.subdivision}
                                 onChange={handleChange}
                                 disabled={loading}
                                 className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
-                            >
-                                <option value="disponible">Disponible</option>
-                                <option value="reservada">Reservada</option>
-                                <option value="vendida">Vendida</option>
-                            </select>
-                        </div>
+                                required
+                            />
+                        )}
+                    </div>
+
+                    {/* ROL */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">
+                            Número de ROL (Escritura)
+                        </label>
+                        <input
+                            type="text"
+                            name="numero_rol"
+                            placeholder="Ej: 123-45"
+                            value={formData.numero_rol}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
+                        />
+                    </div>
+
+                    {/* Precio Base */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">
+                            Precio Venta (CLP) *
+                        </label>
+                        <input
+                            type="number"
+                            name="precio_base"
+                            placeholder="Ej: 15000000"
+                            value={formData.precio_base}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow"
+                            required
+                        />
+                    </div>
+
+                    {/* Estado */}
+                    <div className="flex flex-col gap-1">
+                        <label className="text-xs font-semibold text-on-surface-variant">
+                            Estado *
+                        </label>
+                        <select
+                            name="estado"
+                            value={formData.estado}
+                            onChange={handleChange}
+                            disabled={loading}
+                            className="px-3 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm text-sm outline-none transition-shadow cursor-pointer"
+                        >
+                            <option value="disponible">Disponible</option>
+                            <option value="reservada">Reservada</option>
+                            <option value="vendida">Vendida</option>
+                        </select>
                     </div>
 
                     {/* Footer Actions */}

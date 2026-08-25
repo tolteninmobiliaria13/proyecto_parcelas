@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { getVencimientos, actualizarPago } from '../../services/api';
 import { VencimientosHeader } from '../../components/vencimientos/VencimientosHeader';
@@ -6,9 +7,19 @@ import { VencimientosTable } from '../../components/vencimientos/VencimientosTab
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 
 export const VencimientosPage = () => {
+    const [searchParams] = useSearchParams();
+    const targetLote = searchParams.get('lote') || '';
+    const urlYear = searchParams.get('year');
+
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedYear, setSelectedYear] = useState(String(new Date().getFullYear()));
+    const [selectedYear, setSelectedYear] = useState(urlYear || String(new Date().getFullYear()));
     const [selectedStatus, setSelectedStatus] = useState('Todos');
+
+    useEffect(() => {
+        if (urlYear && urlYear !== selectedYear) {
+            setSelectedYear(urlYear);
+        }
+    }, [urlYear]);
     const [selectedCell, setSelectedCell] = useState<{
         lot: LotPaymentMatrix;
         payment: MonthlyPayment;
@@ -132,6 +143,7 @@ export const VencimientosPage = () => {
                     onCellClick={(lot, payment) => setSelectedCell({ lot, payment })}
                     loading={loading}
                     error={error}
+                    targetLote={targetLote}
                 />
             </div>
 

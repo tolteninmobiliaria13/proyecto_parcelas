@@ -9,6 +9,7 @@ type ParcelasTableProps = {
     searchQuery: string;
     refreshTrigger: number;
     onAssignOwner: (parcela: Parcela) => void;
+    onEditOwner: (parcela: Parcela) => void;
     onEditParcela: (parcela: Parcela) => void;
     onEditContrato: (parcela: Parcela) => void;
     onDeleteParcela: (parcela: Parcela) => void;
@@ -75,6 +76,7 @@ export default function ParcelasTable({
     searchQuery,
     refreshTrigger,
     onAssignOwner,
+    onEditOwner,
     onEditParcela,
     onEditContrato,
     onDeleteParcela,
@@ -83,8 +85,8 @@ export default function ParcelasTable({
     const limit = 10;
 
     const { data, error, isLoading, mutate } = useSWR(
-        ['parcelas', page, limit],
-        ([_, p, l]) => getParcelas(p as number, l as number),
+        ['parcelas'],
+        () => getParcelas(1, 1000),
         { keepPreviousData: true }
     );
 
@@ -94,12 +96,14 @@ export default function ParcelasTable({
         }
     }, [refreshTrigger, mutate]);
 
+    useEffect(() => {
+        setPage(1);
+    }, [searchQuery]);
+
     const parcelas = data?.items || [];
     const sortedParcelas = sortParcelasByLote(parcelas);
-    const totalCount = data?.total || 0;
-    const totalPages = data?.pages || 1;
 
-    // Client-side filtering by id (lote) or owner (propietario)
+    // Client-side filtering by id (lote) or owner (propietario) across all parcels
     const filteredParcelas = sortedParcelas.filter((parcela) => {
         const query = searchQuery.toLowerCase().trim();
         if (!query) return true;
@@ -109,7 +113,10 @@ export default function ParcelasTable({
         );
     });
 
-    const displayCount = searchQuery ? filteredParcelas.length : totalCount;
+    const totalCount = filteredParcelas.length;
+    const totalPages = Math.ceil(totalCount / limit) || 1;
+    const paginatedParcelas = filteredParcelas.slice((page - 1) * limit, page * limit);
+    const displayCount = totalCount;
     const skeletons = Array(limit).fill(null);
 
     return (
@@ -153,12 +160,13 @@ export default function ParcelasTable({
                                     {error.message || "Error"}
                                 </td>
                             </tr>
-                        ) : filteredParcelas.length > 0 ? (
-                            filteredParcelas.map((parcela) => (
+                        ) : paginatedParcelas.length > 0 ? (
+                            paginatedParcelas.map((parcela) => (
                                 <ParcelaRow
                                     key={parcela.id}
                                     parcela={parcela}
                                     onAssign={() => onAssignOwner(parcela)}
+                                    onEditOwner={() => onEditOwner(parcela)}
                                     onEditParcela={() => onEditParcela(parcela)}
                                     onEditContrato={() => onEditContrato(parcela)}
                                     onDeleteParcela={() => onDeleteParcela(parcela)}
@@ -184,12 +192,13 @@ export default function ParcelasTable({
                     <div className="py-8 px-4 text-center text-error font-medium text-sm">
                         {error.message || "Error"}
                     </div>
-                ) : filteredParcelas.length > 0 ? (
-                    filteredParcelas.map((parcela) => (
+                ) : paginatedParcelas.length > 0 ? (
+                    paginatedParcelas.map((parcela) => (
                         <ParcelaCard
                             key={parcela.id}
                             parcela={parcela}
                             onAssign={() => onAssignOwner(parcela)}
+                            onEditOwner={() => onEditOwner(parcela)}
                             onEditParcela={() => onEditParcela(parcela)}
                             onEditContrato={() => onEditContrato(parcela)}
                             onDeleteParcela={() => onDeleteParcela(parcela)}
@@ -207,31 +216,37 @@ export default function ParcelasTable({
                 <span className="font-body-md text-on-surface-variant text-xs sm:text-sm text-center sm:text-left">
                     {isLoading ? (
                         "Cargando parcelas..."
+                    ) : totalCount === 0 ? (
+                        "0 parcelas encontradas"
                     ) : (
                         <>
                             Mostrando <span className="font-medium text-on-surface">{(page - 1) * limit + 1}</span> a <span className="font-medium text-on-surface">{Math.min(page * limit, totalCount)}</span> de <span className="font-medium text-on-surface">{totalCount}</span> parcelas
                         </>
                     )}
                 </span>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => setPage(Math.max(1, page - 1))}
-                        disabled={page === 1}
-                        className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
-                        <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-                    </button>
-                    <div className="flex items-center gap-1">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-md bg-primary-container text-on-primary-container font-data-tabular text-xs sm:text-sm font-medium cursor-pointer">{page}</button>
+                {totalCount > 0 && (
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setPage(Math.max(1, page - 1))}
+                            disabled={page === 1}
+                            className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                        </button>
+                        <div className="flex items-center gap-1">
+                            <span className="px-3 py-1 rounded-md bg-primary-container text-on-primary-container text-xs sm:text-sm font-medium font-data-tabular">
+                                Página {page} de {totalPages}
+                            </span>
+                        </div>
+                        <button
+                            onClick={() => setPage(Math.min(totalPages, page + 1))}
+                            disabled={page >= totalPages}
+                            className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setPage(Math.min(totalPages, page + 1))}
-                        disabled={page >= totalPages}
-                        className="p-1 rounded text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-                    >
-                        <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-                    </button>
-                </div>
+                )}
             </div>
         </div>
     );

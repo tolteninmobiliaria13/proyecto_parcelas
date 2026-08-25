@@ -1,11 +1,21 @@
+import { useEffect, useRef } from 'react';
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 
 interface VencimientosRowProps {
   row: LotPaymentMatrix;
   onCellClick?: (lot: LotPaymentMatrix, payment: MonthlyPayment) => void;
+  isHighlighted?: boolean;
 }
 
-export const VencimientosRow = ({ row, onCellClick }: VencimientosRowProps) => {
+export const VencimientosRow = ({ row, onCellClick, isHighlighted = false }: VencimientosRowProps) => {
+  const rowRef = useRef<HTMLTableRowElement>(null);
+
+  useEffect(() => {
+    if (isHighlighted && rowRef.current) {
+      rowRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isHighlighted]);
+
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -17,9 +27,22 @@ export const VencimientosRow = ({ row, onCellClick }: VencimientosRowProps) => {
   const progressPercent = Math.round((row.paidMonths / row.totalMonths) * 100);
 
   return (
-    <tr className="hover:bg-surface-container/60 transition-colors group cursor-pointer">
+    <tr
+      ref={rowRef}
+      className={`transition-colors group cursor-pointer ${
+        isHighlighted
+          ? 'bg-primary/10 ring-2 ring-primary/50'
+          : 'hover:bg-surface-container/60'
+      }`}
+    >
       {/* Sticky Lot / Client Column */}
-      <td className="p-2 sm:p-md sticky left-0 z-10 bg-surface-container-lowest group-hover:bg-surface-container/60 border-r border-outline-variant min-w-[130px] max-w-[130px] sm:min-w-[200px] sm:max-w-none shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+      <td
+        className={`p-2 sm:p-md sticky left-0 z-10 border-r border-outline-variant min-w-[130px] max-w-[130px] sm:min-w-[200px] sm:max-w-none shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)] ${
+          isHighlighted
+            ? 'bg-primary/15'
+            : 'bg-surface-container-lowest group-hover:bg-surface-container/60'
+        }`}
+      >
         <div className="flex items-center justify-between gap-1">
           <span className="font-bold text-primary text-xs sm:text-[14px]">{row.lotNumber}</span>
           {row.project && (

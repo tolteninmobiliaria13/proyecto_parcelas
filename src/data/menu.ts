@@ -20,5 +20,10 @@ export const menuItems: MenuItem[] = [
         title: "Clientes",
         path: "/clientes",
         icon: "group",
+    },
+    {
+        title: "Papelera",
+        path: "/papelera",
+        icon: "delete_sweep",
     }
 ];

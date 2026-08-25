@@ -7,6 +7,7 @@ import ParcelaStatus from "./ParcelaStatus";
 type ParcelaRowProps = {
     parcela: Parcela;
     onAssign: () => void;
+    onEditOwner: () => void;
     onEditParcela: () => void;
     onEditContrato: () => void;
     onDeleteParcela: () => void;
@@ -34,6 +35,7 @@ function getAvatarClasses(name: string, status: string) {
 type ParcelaActionsMenuProps = {
     parcela: Parcela;
     onAssign: () => void;
+    onEditOwner: () => void;
     onEditParcela: () => void;
     onEditContrato: () => void;
     onDeleteParcela: () => void;
@@ -42,6 +44,7 @@ type ParcelaActionsMenuProps = {
 function ParcelaActionsMenu({
     parcela,
     onAssign,
+    onEditOwner,
     onEditParcela,
     onEditContrato,
     onDeleteParcela,
@@ -108,19 +111,19 @@ function ParcelaActionsMenu({
                             top: `${coords.top}px`,
                             left: `${coords.left}px`,
                         }}
-                        className="w-44 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-[101] text-left font-body-md animate-fade-in"
+                        className="w-48 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-[101] text-left font-body-md animate-fade-in"
                     >
                         <button
                             onClick={() => {
                                 setIsOpen(false);
-                                navigate("/vencimientos");
+                                navigate(`/vencimientos?lote=${encodeURIComponent(parcela.id)}`);
                             }}
                             className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium"
                         >
                             <span className="material-symbols-outlined text-[18px] text-primary">payments</span>
                             <span>Ver pagos</span>
                         </button>
-                        {parcela.status === "inactive" ? (
+                        {parcela.status === "inactive" || parcela.owner === "Sin Asignar" ? (
                             <button
                                 onClick={() => {
                                     setIsOpen(false);
@@ -132,16 +135,28 @@ function ParcelaActionsMenu({
                                 <span>Asignar Dueño</span>
                             </button>
                         ) : (
-                            <button
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    onEditContrato();
-                                }}
-                                className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
-                            >
-                                <span className="material-symbols-outlined text-[18px] text-primary">edit_document</span>
-                                <span>Editar Contrato</span>
-                            </button>
+                            <>
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        onEditOwner();
+                                    }}
+                                    className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
+                                >
+                                    <span className="material-symbols-outlined text-[18px] text-primary">person</span>
+                                    <span>Cambiar Propietario</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        onEditContrato();
+                                    }}
+                                    className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
+                                >
+                                    <span className="material-symbols-outlined text-[18px] text-primary">description</span>
+                                    <span>Editar Contrato</span>
+                                </button>
+                            </>
                         )}
                         <button
                             onClick={() => {
@@ -175,6 +190,7 @@ function ParcelaActionsMenu({
 export function ParcelaCard({
     parcela,
     onAssign,
+    onEditOwner,
     onEditParcela,
     onEditContrato,
     onDeleteParcela,
@@ -191,6 +207,7 @@ export function ParcelaCard({
                     <ParcelaActionsMenu
                         parcela={parcela}
                         onAssign={onAssign}
+                        onEditOwner={onEditOwner}
                         onEditParcela={onEditParcela}
                         onEditContrato={onEditContrato}
                         onDeleteParcela={onDeleteParcela}
@@ -230,6 +247,7 @@ export function ParcelaCard({
 export default function ParcelaRow({
     parcela,
     onAssign,
+    onEditOwner,
     onEditParcela,
     onEditContrato,
     onDeleteParcela,
@@ -272,6 +290,7 @@ export default function ParcelaRow({
                     <ParcelaActionsMenu
                         parcela={parcela}
                         onAssign={onAssign}
+                        onEditOwner={onEditOwner}
                         onEditParcela={onEditParcela}
                         onEditContrato={onEditContrato}
                         onDeleteParcela={onDeleteParcela}
