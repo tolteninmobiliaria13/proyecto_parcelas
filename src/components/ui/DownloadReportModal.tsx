@@ -30,7 +30,7 @@ export default function DownloadReportModal({
     onClose,
 }: DownloadReportModalProps) {
     const today = new Date();
-    const [reportType, setReportType] = useState<"estado_cuenta" | "cuotas_parcelas">("estado_cuenta");
+    const [reportType, setReportType] = useState<"estado_cuenta" | "estado_cuenta_cuotas" | "cuotas_parcelas">("estado_cuenta");
     const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
     const [loading, setLoading] = useState(false);
@@ -42,10 +42,14 @@ export default function DownloadReportModal({
         setLoading(true);
         setError(null);
         try {
-            const data = await getReporteData(selectedMonth, selectedYear);
             if (reportType === "estado_cuenta") {
+                const data = await getReporteData(selectedMonth, selectedYear);
                 downloadReportDocx(data);
+            } else if (reportType === "estado_cuenta_cuotas") {
+                const data = await getReporteData(selectedMonth, selectedYear, "credito");
+                downloadReportDocx(data, "ESTADO DE CUENTA - SOLO CUOTAS", "Estado_Cuenta_Solo_Cuotas");
             } else {
+                const data = await getReporteData(selectedMonth, selectedYear);
                 downloadReportCuotas(data);
             }
             onClose();
@@ -93,7 +97,7 @@ export default function DownloadReportModal({
                     <label className="text-xs font-semibold text-on-surface-variant">
                         Tipo de Reporte *
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2">
                         <button
                             type="button"
                             onClick={() => setReportType("estado_cuenta")}
@@ -109,7 +113,26 @@ export default function DownloadReportModal({
                                 <span className="text-xs">Estado de Cuenta</span>
                             </div>
                             <span className="text-[10px] text-on-surface-variant font-normal">
-                                Resumen ejecutivo y cobranzas del mes
+                                Resumen ejecutivo y cobranzas del mes (Todos los contratos)
+                            </span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setReportType("estado_cuenta_cuotas")}
+                            disabled={loading}
+                            className={`p-3 rounded-xl border text-left flex flex-col gap-1 transition-all cursor-pointer ${
+                                reportType === "estado_cuenta_cuotas"
+                                    ? "bg-primary/10 border-primary text-primary font-bold shadow-xs"
+                                    : "bg-surface-container-low border-outline-variant/40 text-on-surface-variant hover:text-on-surface"
+                            }`}
+                        >
+                            <div className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[20px]">payments</span>
+                                <span className="text-xs">Estado de Cuenta (Solo Cuotas)</span>
+                            </div>
+                            <span className="text-[10px] text-on-surface-variant font-normal">
+                                Excluye pagos al contado y filtra solo ventas a crédito
                             </span>
                         </button>
 
