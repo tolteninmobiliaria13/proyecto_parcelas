@@ -53,7 +53,10 @@ export default function Login() {
                 setPassword("");
             }
         } catch (error: any) {
-            setErrorMsg(error.message || "Ocurrió un error al procesar tu solicitud.");
+            const msg = error?.message === "Invalid login credentials"
+                ? "Correo o contraseña incorrectos. Por favor verifica tus datos."
+                : (error?.message || "Ocurrió un error al procesar tu solicitud.");
+            setErrorMsg(msg);
         } finally {
             setSubmitting(false);
         }

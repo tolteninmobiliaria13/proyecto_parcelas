@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { supabase } from "../services/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 import { checkUserPermission } from "../services/api";
 import type { UserRole } from "../types/auth";
+import axios from "axios";
 
 interface AuthContextType {
     user: User | null;
@@ -28,36 +29,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
     const [authError, setAuthError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const lastCheckedEmailRef = useRef<string | null>(null);
+
+    const safeSignOut = async () => {
+        try {
+            await supabase.auth.signOut();
+        } catch (e) {
+            console.warn("Aviso al cerrar sesión en Supabase:", e);
+        }
+    };
 
     const handleUserSession = async (currentSession: Session | null) => {
         setSession(currentSession);
         const currentUser = currentSession?.user ?? null;
 
         if (currentUser && currentUser.email) {
+            if (lastCheckedEmailRef.current === currentUser.email && isAuthorized) {
+                setLoading(false);
+                return;
+            }
+
             try {
+                lastCheckedEmailRef.current = currentUser.email;
                 const check = await checkUserPermission(currentUser.email);
+                
+                if (lastCheckedEmailRef.current !== currentUser.email) {
+                    return;
+                }
+
                 if (check.is_authorized) {
                     setUser(currentUser);
                     setRole((check.rol as UserRole) || "user");
                     setIsAuthorized(true);
                     setAuthError(null);
                 } else {
-                    // Si el correo no está autorizado, cerramos sesión inmediatamente
-                    await supabase.auth.signOut();
+                    await safeSignOut();
                     setUser(null);
                     setRole(null);
                     setIsAuthorized(false);
                     setAuthError(check.message || "Tu correo electrónico no está autorizado para acceder al sistema.");
                 }
             } catch (err) {
+                if (axios.isCancel(err)) {
+                    return;
+                }
                 console.error("Error al validar autorización:", err);
-                await supabase.auth.signOut();
+                await safeSignOut();
                 setUser(null);
                 setRole(null);
                 setIsAuthorized(false);
                 setAuthError("No se pudo verificar el permiso de acceso con el servidor.");
             }
         } else {
+            lastCheckedEmailRef.current = null;
             setUser(null);
             setRole(null);
             setIsAuthorized(false);
@@ -66,20 +90,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        // Obtener la sesión inicial
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            handleUserSession(session);
-        }).catch((err) => {
-            console.error("Error al obtener la sesión inicial:", err);
-            setLoading(false);
-        });
+        let isSubscribed = true;
 
-        // Suscribirse a cambios en el estado de autenticación
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            handleUserSession(session);
+            if (isSubscribed) {
+                handleUserSession(session);
+            }
         });
 
         return () => {
+            isSubscribed = false;
             subscription.unsubscribe();
         };
     }, []);
@@ -114,13 +134,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
+        await safeSignOut();
         setUser(null);
         setSession(null);
         setRole(null);
         setIsAuthorized(false);
         setAuthError(null);
-        if (error) throw error;
     };
 
     const clearAuthError = () => setAuthError(null);

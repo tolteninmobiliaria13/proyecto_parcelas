@@ -2,7 +2,11 @@
 import html2pdf from 'html2pdf.js';
 import type { ReporteData } from "../services/api";
 
-export const downloadReportDocx = (data: ReporteData) => {
+export const downloadReportDocx = (
+    data: ReporteData,
+    title: string = "ESTADO DE CUENTA",
+    filenamePrefix: string = "Estado_Cuenta"
+) => {
     const tienePagosAtrasados = (data.resumen_ejecutivo.recuperacion_mora_val ?? 0) > 0 || (!!data.resumen_ejecutivo.recuperacion_mora_fmt && data.resumen_ejecutivo.recuperacion_mora_fmt !== '$ 0');
     const tienePagosAdelantados = (data.resumen_ejecutivo.pagos_adelantados_val ?? 0) > 0 || (!!data.resumen_ejecutivo.pagos_adelantados_fmt && data.resumen_ejecutivo.pagos_adelantados_fmt !== '$ 0');
     const tieneCuentasPorCobrar = !!data.resumen_ejecutivo.cuentas_por_cobrar_fmt && data.resumen_ejecutivo.cuentas_por_cobrar_fmt !== '$ 0';
@@ -32,7 +36,7 @@ export const downloadReportDocx = (data: ReporteData) => {
     const htmlContent = `
         <div id="pdf-container" style="padding: 30px; background-color: white; font-family: serif; color: black; box-sizing: border-box;">
             <!-- Título Central -->
-            <h1 style="text-align: center; color: #2f5597; font-weight: bold; font-size: 20px; margin-bottom: 32px;">ESTADO DE CUENTA</h1>
+            <h1 style="text-align: center; color: #2f5597; font-weight: bold; font-size: 20px; margin-bottom: 32px;">${title}</h1>
 
             <!-- Información de Encabezado -->
             <div style="margin-bottom: 32px; line-height: 1.6;">
@@ -110,7 +114,7 @@ export const downloadReportDocx = (data: ReporteData) => {
 
     const opt = {
         margin: 10, // mm
-        filename: `Estado_Cuenta_${data.fecha_emision.replace(/-/g, '_')}.pdf`,
+        filename: `${filenamePrefix}_${data.fecha_emision.replace(/-/g, '_')}.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, windowWidth: 800 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }

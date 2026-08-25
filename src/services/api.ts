@@ -522,10 +522,11 @@ export const getNotificationsSummary = async (): Promise<NotificationsSummary> =
 /**
  * Obtiene los datos del reporte de pagos del mes presente desde la API REST.
  */
-export const getReporteData = async (month?: number, year?: number): Promise<ReporteData> => {
+export const getReporteData = async (month?: number, year?: number, tipoPago?: string): Promise<ReporteData> => {
     const params = new URLSearchParams();
     if (month) params.append('month', String(month));
     if (year) params.append('year', String(year));
+    if (tipoPago) params.append('tipo_pago', tipoPago);
     const queryString = params.toString() ? `?${params.toString()}` : '';
     const response = await apiClient.get<ReporteData>(`/vencimientos/reporte-data${queryString}`);
     return response.data;
@@ -539,6 +540,9 @@ export const checkUserPermission = async (email: string): Promise<CheckAuthRespo
         const response = await apiClient.get<CheckAuthResponse>(`/auth/check?email=${encodeURIComponent(email)}`);
         return response.data;
     } catch (error) {
+        if (axios.isCancel(error)) {
+            throw error;
+        }
         console.error("Error al verificar permisos del usuario:", error);
         return {
             is_authorized: false,
