@@ -72,9 +72,9 @@ function RowActionsMenu({ lot }: { lot?: Lot }) {
                     yearParam = `&year=${parts[2]}`;
                 }
             }
-            navigate(`/vencimientos?lote=${encodeURIComponent(lot.lot)}${yearParam}`);
+            navigate(`/pagos?lote=${encodeURIComponent(lot.lot)}${yearParam}`);
         } else {
-            navigate("/vencimientos");
+            navigate("/pagos");
         }
     };
 

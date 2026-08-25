@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import type { Parcela } from "../../types/parcela";
 import ParcelaStatus from "./ParcelaStatus";
@@ -7,50 +6,24 @@ import ParcelaStatus from "./ParcelaStatus";
 type ParcelaRowProps = {
     parcela: Parcela;
     onAssign: () => void;
-    onEditOwner: () => void;
     onEditParcela: () => void;
-    onEditContrato: () => void;
     onDeleteParcela: () => void;
 };
-
-function getInitials(name: string) {
-    if (name === "Sin Asignar") return "ND";
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-        return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-}
-
-function getAvatarClasses(name: string, status: string) {
-    if (name === "Sin Asignar") {
-        return "bg-surface-variant text-on-surface-variant";
-    }
-    if (status === "overdue") {
-        return "bg-tertiary-container text-on-tertiary-container";
-    }
-    return "bg-secondary-container text-on-secondary-container";
-}
 
 type ParcelaActionsMenuProps = {
     parcela: Parcela;
     onAssign: () => void;
-    onEditOwner: () => void;
     onEditParcela: () => void;
-    onEditContrato: () => void;
     onDeleteParcela: () => void;
 };
 
 function ParcelaActionsMenu({
     parcela,
     onAssign,
-    onEditOwner,
     onEditParcela,
-    onEditContrato,
     onDeleteParcela,
 }: ParcelaActionsMenuProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const navigate = useNavigate();
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [coords, setCoords] = useState({ top: 0, left: 0 });
 
@@ -113,57 +86,26 @@ function ParcelaActionsMenu({
                         }}
                         className="w-48 bg-surface-container-lowest border border-outline-variant rounded-lg shadow-lg py-1 z-[101] text-left font-body-md animate-fade-in"
                     >
-                        <button
-                            onClick={() => {
-                                setIsOpen(false);
-                                navigate(`/vencimientos?lote=${encodeURIComponent(parcela.id)}`);
-                            }}
-                            className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium"
-                        >
-                            <span className="material-symbols-outlined text-[18px] text-primary">payments</span>
-                            <span>Ver pagos</span>
-                        </button>
-                        {parcela.status === "inactive" || parcela.owner === "Sin Asignar" ? (
+                        {(parcela.status === "inactive" || parcela.owner === "Sin Asignar") && (
                             <button
                                 onClick={() => {
                                     setIsOpen(false);
                                     onAssign();
                                 }}
-                                className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
+                                className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium"
                             >
                                 <span className="material-symbols-outlined text-[18px] text-primary">person_add</span>
                                 <span>Asignar Dueño</span>
                             </button>
-                        ) : (
-                            <>
-                                <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        onEditOwner();
-                                    }}
-                                    className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
-                                >
-                                    <span className="material-symbols-outlined text-[18px] text-primary">person</span>
-                                    <span>Cambiar Propietario</span>
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsOpen(false);
-                                        onEditContrato();
-                                    }}
-                                    className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
-                                >
-                                    <span className="material-symbols-outlined text-[18px] text-primary">description</span>
-                                    <span>Editar Contrato</span>
-                                </button>
-                            </>
                         )}
                         <button
                             onClick={() => {
                                 setIsOpen(false);
                                 onEditParcela();
                             }}
-                            className="w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium border-t border-outline-variant/30"
+                            className={`w-full px-3 py-2 text-on-surface hover:bg-surface-container-low transition-colors flex items-center gap-2.5 cursor-pointer text-xs font-medium ${
+                                parcela.status === "inactive" || parcela.owner === "Sin Asignar" ? "border-t border-outline-variant/30" : ""
+                            }`}
                         >
                             <span className="material-symbols-outlined text-[18px] text-primary">edit</span>
                             <span>Editar Parcela</span>
@@ -186,59 +128,35 @@ function ParcelaActionsMenu({
     );
 }
 
-
 export function ParcelaCard({
     parcela,
     onAssign,
-    onEditOwner,
     onEditParcela,
-    onEditContrato,
     onDeleteParcela,
 }: ParcelaRowProps) {
-    const initials = getInitials(parcela.owner);
-    const avatarClasses = getAvatarClasses(parcela.owner, parcela.status);
-
     return (
         <div className="p-4 bg-surface-container-lowest flex flex-col gap-3">
             <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-primary text-base">{parcela.id}</span>
+                <div className="flex items-center gap-2">
+                    <span className="font-bold text-primary text-base">{parcela.id}</span>
+                    <span className="text-xs text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
+                        {parcela.subdivision || "Sin Loteo"}
+                    </span>
+                </div>
                 <div className="flex items-center gap-1">
-                    <ParcelaStatus status={parcela.status} />
+                    <ParcelaStatus status={parcela.estado} />
                     <ParcelaActionsMenu
                         parcela={parcela}
                         onAssign={onAssign}
-                        onEditOwner={onEditOwner}
                         onEditParcela={onEditParcela}
-                        onEditContrato={onEditContrato}
                         onDeleteParcela={onDeleteParcela}
                     />
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-full ${avatarClasses} flex items-center justify-center font-bold text-xs shrink-0`}>
-                    {initials}
-                </div>
-                <span className="font-medium text-on-surface text-sm">{parcela.owner}</span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs bg-surface-container-low/60 p-2.5 rounded-lg border border-outline-variant/30">
-                <div>
-                    <span className="text-on-surface-variant block text-[11px]">Escritura</span>
-                    <span className="font-medium text-on-surface">{parcela.escritura}</span>
-                </div>
-                <div>
-                    <span className="text-on-surface-variant block text-[11px]">Precio Venta</span>
-                    <span className="font-semibold text-on-surface">$ {parcela.precioVenta.toLocaleString("es-CL")}</span>
-                </div>
-                <div>
-                    <span className="text-on-surface-variant block text-[11px]">Abono</span>
-                    <span className="font-semibold text-emerald-600 font-medium">$ {parcela.abono.toLocaleString("es-CL")}</span>
-                </div>
-                <div>
-                    <span className="text-on-surface-variant block text-[11px]">Saldo</span>
-                    <span className="font-semibold text-on-surface">$ {parcela.saldo.toLocaleString("es-CL")}</span>
-                </div>
+            <div className="flex items-center justify-between text-xs bg-surface-container-low/60 p-2.5 rounded-lg border border-outline-variant/30">
+                <span className="text-on-surface-variant">Precio Venta</span>
+                <span className="font-semibold text-on-surface text-sm">$ {parcela.precioVenta.toLocaleString("es-CL")}</span>
             </div>
         </div>
     );
@@ -247,52 +165,31 @@ export function ParcelaCard({
 export default function ParcelaRow({
     parcela,
     onAssign,
-    onEditOwner,
     onEditParcela,
-    onEditContrato,
     onDeleteParcela,
 }: ParcelaRowProps) {
-    const initials = getInitials(parcela.owner);
-    const avatarClasses = getAvatarClasses(parcela.owner, parcela.status);
-
     return (
         <tr className="hover:bg-surface-container/60 transition-colors group text-center">
-            <td className="py-4 px-4 font-medium text-primary whitespace-nowrap text-center border-r border-outline-variant">
+            <td className="py-4 px-6 font-bold text-primary whitespace-nowrap text-center border-r border-outline-variant">
                 {parcela.id}
             </td>
-            <td className="py-4 px-4 whitespace-nowrap text-center border-r border-outline-variant">
-                <div className="flex items-center justify-center gap-3">
-                    <div className={`w-8 h-8 rounded-full ${avatarClasses} flex items-center justify-center font-bold text-xs shrink-0`}>
-                        {initials}
-                    </div>
-                    <span className="font-medium text-on-surface">{parcela.owner}</span>
-                </div>
+            <td className="py-4 px-6 text-on-surface-variant whitespace-nowrap text-center border-r border-outline-variant font-medium">
+                {parcela.subdivision || "Sin Loteo"}
             </td>
-            <td className="py-4 px-4 text-on-surface-variant whitespace-nowrap text-center border-r border-outline-variant font-mono text-xs">
-                {parcela.escritura}
-            </td>
-            <td className="py-4 px-4 text-on-surface whitespace-nowrap text-center border-r border-outline-variant font-semibold">
+            <td className="py-4 px-6 text-on-surface whitespace-nowrap text-center border-r border-outline-variant font-semibold">
                 $ {parcela.precioVenta.toLocaleString("es-CL")}
             </td>
-            <td className="py-4 px-4 text-emerald-600 whitespace-nowrap text-center border-r border-outline-variant font-semibold">
-                $ {parcela.abono.toLocaleString("es-CL")}
-            </td>
-            <td className="py-4 px-4 text-on-surface whitespace-nowrap text-center border-r border-outline-variant font-semibold">
-                $ {parcela.saldo.toLocaleString("es-CL")}
-            </td>
-            <td className="py-4 px-4 whitespace-nowrap text-center border-r border-outline-variant">
+            <td className="py-4 px-6 whitespace-nowrap text-center border-r border-outline-variant">
                 <div className="flex items-center justify-center">
                     <ParcelaStatus status={parcela.estado} />
                 </div>
             </td>
-            <td className="py-4 px-4 text-center whitespace-nowrap">
+            <td className="py-4 px-6 text-center whitespace-nowrap">
                 <div className="flex items-center justify-center">
                     <ParcelaActionsMenu
                         parcela={parcela}
                         onAssign={onAssign}
-                        onEditOwner={onEditOwner}
                         onEditParcela={onEditParcela}
-                        onEditContrato={onEditContrato}
                         onDeleteParcela={onDeleteParcela}
                     />
                 </div>
@@ -300,3 +197,4 @@ export default function ParcelaRow({
         </tr>
     );
 }
+

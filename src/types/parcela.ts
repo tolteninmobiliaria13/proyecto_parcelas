@@ -8,4 +8,7 @@ export interface Parcela {
     status: "current" | "overdue" | "inactive";
     subdivision?: string;
     estado?: string;
+    total_cuotas?: number;
+    cuotas_pagadas?: number;
+    tipo_pago?: string;
 }

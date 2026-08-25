@@ -4,8 +4,6 @@ import ParcelasTable from "../../components/parcelas/ParcelasTable";
 import NuevaParcelaModal from "../../components/parcelas/NuevaParcelaModal";
 import EditarParcelaModal from "../../components/parcelas/EditarParcelaModal";
 import AsignarPropietarioModal from "../../components/parcelas/AsignarPropietarioModal";
-import CambiarPropietarioModal from "../../components/parcelas/CambiarPropietarioModal";
-import EditarContratoModal from "../../components/parcelas/EditarContratoModal";
 import SubdivisionesModal from "../../components/parcelas/SubdivisionesModal";
 import ConfirmModal from "../../components/ui/ConfirmModal";
 import { deleteParcela } from "../../services/api";
@@ -18,8 +16,6 @@ export default function ParcelasPage() {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
 
     const [parcelaToAssign, setParcelaToAssign] = useState<Parcela | null>(null);
-    const [parcelaToEditOwner, setParcelaToEditOwner] = useState<Parcela | null>(null);
-    const [parcelaToEditContrato, setParcelaToEditContrato] = useState<Parcela | null>(null);
     const [parcelaToEdit, setParcelaToEdit] = useState<Parcela | null>(null);
     const [parcelaToMoveToPapelera, setParcelaToMoveToPapelera] = useState<Parcela | null>(null);
 
@@ -44,7 +40,7 @@ export default function ParcelasPage() {
                     <div>
                         <h2 className="font-display text-2xl sm:text-display text-on-background font-bold">Listado de Parcelas</h2>
                         <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
-                            Administración y registro general de loteos.
+                            Administración y registro general del inventario de loteos.
                         </p>
                     </div>
 
@@ -56,7 +52,7 @@ export default function ParcelasPage() {
                             </span>
                             <input
                                 type="text"
-                                placeholder="Buscar parcela o propietario..."
+                                placeholder="Buscar parcela o loteo..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="pl-10 pr-4 py-2 border border-outline-variant rounded-lg bg-surface-container-lowest text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary w-full shadow-sm transition-shadow font-body-md text-sm outline-none"
@@ -89,9 +85,7 @@ export default function ParcelasPage() {
                     searchQuery={searchQuery}
                     refreshTrigger={refreshTrigger}
                     onAssignOwner={(p) => setParcelaToAssign(p)}
-                    onEditOwner={(p) => setParcelaToEditOwner(p)}
                     onEditParcela={(p) => setParcelaToEdit(p)}
-                    onEditContrato={(p) => setParcelaToEditContrato(p)}
                     onDeleteParcela={(p) => setParcelaToMoveToPapelera(p)}
                 />
             </div>
@@ -126,32 +120,6 @@ export default function ParcelasPage() {
                     onClose={() => setParcelaToAssign(null)}
                     onSuccess={() => {
                         setParcelaToAssign(null);
-                        setRefreshTrigger((prev) => prev + 1);
-                    }}
-                />
-            )}
-
-            {/* Cambiar Titular / Propietario Modal */}
-            {parcelaToEditOwner && (
-                <CambiarPropietarioModal
-                    isOpen={Boolean(parcelaToEditOwner)}
-                    parcela={parcelaToEditOwner}
-                    onClose={() => setParcelaToEditOwner(null)}
-                    onSuccess={() => {
-                        setParcelaToEditOwner(null);
-                        setRefreshTrigger((prev) => prev + 1);
-                    }}
-                />
-            )}
-
-            {/* Editar Condiciones de Contrato Modal */}
-            {parcelaToEditContrato && (
-                <EditarContratoModal
-                    isOpen={Boolean(parcelaToEditContrato)}
-                    parcela={parcelaToEditContrato}
-                    onClose={() => setParcelaToEditContrato(null)}
-                    onSuccess={() => {
-                        setParcelaToEditContrato(null);
                         setRefreshTrigger((prev) => prev + 1);
                     }}
                 />

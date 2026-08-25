@@ -1,10 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/login/Login";
 import DashboardPage from "../pages/dashboard/Dashboardpage";
 import ParcelasPage from "../pages/parcelas/ParcelasPage";
 import ClientesPage from "../pages/clientes/ClientesPage";
-import VencimientosPage from "../pages/vencimientos/VencimientosPage";
+import PagosPage from "../pages/pagos/PagosPage";
+import ContratosPage from "../pages/contratos/ContratosPage";
 import PapeleraPage from "../pages/papelera/PapeleraPage";
 import Usuarios from "../pages/usuarios/Usuarios";
 import ProtectedRoute from "./ProtectedRoute";
@@ -32,13 +33,23 @@ export default function AppRouter() {
                     />
 
                     <Route
+                        path="/contratos"
+                        element={<ContratosPage />}
+                    />
+
+                    <Route
                         path="/clientes"
                         element={<ClientesPage />}
                     />
 
                     <Route
+                        path="/pagos"
+                        element={<PagosPage />}
+                    />
+
+                    <Route
                         path="/vencimientos"
-                        element={<VencimientosPage />}
+                        element={<Navigate to="/pagos" replace />}
                     />
 
                     <Route
