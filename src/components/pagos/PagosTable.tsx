@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
-import { monthsList } from '../../data/vencimientos';
-import { VencimientosRow } from './VencimientosRow';
+import { monthsList } from '../../data/pagos';
+import { PagoRow } from './PagoRow';
 import { sortParcelasByLote } from '../../utils/loteSort';
 
 const ITEMS_PER_PAGE = 10;
 
-interface VencimientosTableProps {
+interface PagosTableProps {
   data: LotPaymentMatrix[];
   selectedYear?: string;
   onYearChange?: (year: string) => void;
@@ -16,7 +16,7 @@ interface VencimientosTableProps {
   targetLote?: string;
 }
 
-function VencimientosRowSkeleton({ monthsCount }: { monthsCount: number }) {
+function PagoRowSkeleton({ monthsCount }: { monthsCount: number }) {
   return (
     <tr className="animate-pulse">
       <td className="p-md sticky left-0 z-10 bg-surface-container-lowest border-r border-outline-variant">
@@ -36,14 +36,14 @@ function VencimientosRowSkeleton({ monthsCount }: { monthsCount: number }) {
   );
 }
 
-export const VencimientosTable = ({
+export const PagosTable = ({
   data,
   selectedYear = String(new Date().getFullYear()),
   onCellClick,
   loading = false,
   error = null,
   targetLote = '',
-}: VencimientosTableProps) => {
+}: PagosTableProps) => {
   const [page, setPage] = useState(1);
   const months = monthsList;
   const sortedData = sortParcelasByLote(data);
@@ -131,7 +131,7 @@ export const VencimientosTable = ({
           <tbody className="font-data-tabular text-data-tabular divide-y divide-outline-variant">
             {loading ? (
               Array(3).fill(null).map((_, i) => (
-                <VencimientosRowSkeleton key={i} monthsCount={months.length} />
+                <PagoRowSkeleton key={i} monthsCount={months.length} />
               ))
             ) : error ? (
               <tr>
@@ -153,7 +153,7 @@ export const VencimientosTable = ({
               </tr>
             ) : (
               paginatedData.map((row) => (
-                <VencimientosRow
+                <PagoRow
                   key={row.id}
                   row={row}
                   onCellClick={onCellClick}

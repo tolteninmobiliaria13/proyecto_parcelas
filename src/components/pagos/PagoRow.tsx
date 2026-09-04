@@ -1,13 +1,13 @@
 import { useEffect, useRef } from 'react';
 import type { LotPaymentMatrix, MonthlyPayment } from '../../types/payment';
 
-interface VencimientosRowProps {
+interface PagoRowProps {
   row: LotPaymentMatrix;
   onCellClick?: (lot: LotPaymentMatrix, payment: MonthlyPayment) => void;
   isHighlighted?: boolean;
 }
 
-export const VencimientosRow = ({ row, onCellClick, isHighlighted = false }: VencimientosRowProps) => {
+export const PagoRow = ({ row, onCellClick, isHighlighted = false }: PagoRowProps) => {
   const rowRef = useRef<HTMLTableRowElement>(null);
 
   useEffect(() => {

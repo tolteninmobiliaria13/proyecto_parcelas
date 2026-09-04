@@ -7,14 +7,19 @@ export const menuItems: MenuItem[] = [
         icon: "dashboard",
     },
     {
-        title: "Parcelas y Dueños",
+        title: "Parcelas",
         path: "/parcelas",
         icon: "location_on",
     },
     {
-        title: "Vencimientos",
-        path: "/vencimientos",
-        icon: "event_busy",
+        title: "Contratos",
+        path: "/contratos",
+        icon: "description",
+    },
+    {
+        title: "Pagos",
+        path: "/pagos",
+        icon: "payments",
     },
     {
         title: "Clientes",

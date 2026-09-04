@@ -1,6 +1,6 @@
 const YEARS = ['2024', '2025', '2026'];
 
-interface VencimientosHeaderProps {
+interface PagosHeaderProps {
   searchTerm?: string;
   onSearchChange?: (val: string) => void;
   selectedYear?: string;
@@ -9,22 +9,22 @@ interface VencimientosHeaderProps {
   onStatusChange?: (status: string) => void;
 }
 
-export const VencimientosHeader = ({
+export const PagosHeader = ({
   searchTerm = '',
   onSearchChange,
   selectedYear = '',
   onYearChange,
   selectedStatus = 'Todos',
   onStatusChange,
-}: VencimientosHeaderProps) => {
+}: PagosHeaderProps) => {
   return (
     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div>
         <h2 className="font-display text-2xl sm:text-display text-on-background font-bold">
-          Control de Cuotas y Vencimientos
+          Control de Pagos y Cuotas
         </h2>
         <p className="font-body-md text-xs sm:text-body-md text-on-surface-variant mt-1">
-          Matriz de seguimiento de pagos por lote y período fiscal.
+          Matriz anual de seguimiento de pagos por lote y período fiscal.
         </p>
       </div>
 
